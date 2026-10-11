@@ -6,7 +6,9 @@ namespace Shroud\Platform;
 
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
+use Shroud\Schema\DraftRule;
 use Shroud\Schema\FrozenSchemas;
+use Shroud\Schema\Glossary\GlossaryInterface;
 
 /**
  * Gathers what the core needs to know about the CMS, or the application, that owns the base.
@@ -55,4 +57,23 @@ interface PlatformInterface
      * Reads the version of the platform installed on an open base, or null when the base does not tell.
      */
     public function readVersion(\PDO $pdo): ?string;
+
+    /**
+     * Lists the rules of the platform for drafting a declaration, tried before the generic ones.
+     *
+     * The secrets of the platform to clear, the columns of its polymorphic links.
+     *
+     * @return list<DraftRule>
+     */
+    public function draftRules(): array;
+
+    /**
+     * Lists the glossaries that name the columns of the platform, in order of trial.
+     *
+     * The language of a schema is that of the platform, not of the site: a platform written in
+     * French names its columns in French, with some English loans.
+     *
+     * @return list<GlossaryInterface>
+     */
+    public function glossaries(): array;
 }

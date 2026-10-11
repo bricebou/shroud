@@ -10,6 +10,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
 use Shroud\Generator;
 use Shroud\Platform\Generic;
+use Shroud\Schema\Glossary\English;
 use Shroud\Strategy\Reference\RenumberedId;
 
 final class PlatformTest extends TestCase
@@ -25,6 +26,8 @@ final class PlatformTest extends TestCase
         self::assertSame([], $generic->bareDeclaration()->tables());
         self::assertSame([], $generic->frozenSchemas()->versions());
         self::assertNull($generic->readVersion(new \PDO('sqlite::memory:')));
+        self::assertSame([], $generic->draftRules());
+        self::assertEquals([new English()], $generic->glossaries());
     }
 
     public function testTheGeneratorIsGenericUnlessGivenAPlatform(): void

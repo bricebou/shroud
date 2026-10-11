@@ -7,6 +7,7 @@ namespace Shroud\Platform;
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
 use Shroud\Schema\FrozenSchemas;
+use Shroud\Schema\Glossary\English;
 
 /**
  * Treats the base as a generic relational base: no markup beyond HTML, no embedded reference,
@@ -42,5 +43,15 @@ final class Generic implements PlatformInterface
     public function readVersion(\PDO $pdo): ?string
     {
         return null;
+    }
+
+    public function draftRules(): array
+    {
+        return [];
+    }
+
+    public function glossaries(): array
+    {
+        return [new English()];
     }
 }

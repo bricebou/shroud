@@ -9,10 +9,15 @@ use Shroud\Declaration\Declaration;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Declaration\Table;
 use Shroud\Platform\PlatformInterface;
+use Shroud\Schema\DraftRule;
 use Shroud\Schema\FrozenSchemas;
+use Shroud\Schema\Glossary\English;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FullName;
 use Shroud\Strategy\Reference\RenumberedId;
+use Shroud\Strategy\Reference\RenumberedPolymorphicId;
+use Shroud\Strategy\Value\Clear;
+use Shroud\Strategy\Value\Keep;
 
 /**
  * A made-up platform for the tests: template tags `{{name}}` are markup, and `#type:12` references
@@ -61,5 +66,19 @@ final class TestPlatform implements PlatformInterface
     public function readVersion(\PDO $pdo): ?string
     {
         return null;
+    }
+
+    public function draftRules(): array
+    {
+        return [
+            new DraftRule('/^object_id$/', "new RenumberedPolymorphicId('object_type')", sibling: 'object_type', imports: [RenumberedPolymorphicId::class]),
+            new DraftRule('/^object_type$/', 'new Keep()', imports: [Keep::class]),
+            new DraftRule('/^(remember_token|recovery_code)$/', 'new Clear()', imports: [Clear::class]),
+        ];
+    }
+
+    public function glossaries(): array
+    {
+        return [new English()];
     }
 }
