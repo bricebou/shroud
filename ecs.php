@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use PhpCsFixer\Fixer\ControlStructure\TrailingCommaInMultilineFixer;
 use PhpCsFixer\Fixer\LanguageConstruct\IsNullFixer;
+use PhpCsFixer\Fixer\Phpdoc\PhpdocAlignFixer;
 use PhpCsFixer\Fixer\Strict\DeclareStrictTypesFixer;
 use PhpCsFixer\Fixer\Strict\StrictComparisonFixer;
 use PhpCsFixer\Fixer\Strict\StrictParamFixer;
@@ -19,6 +20,10 @@ return ECSConfig::configure()
         IsNullFixer::class,
         StrictComparisonFixer::class,
         StrictParamFixer::class,
+    ])
+    // No vertical alignment in docblocks: one space between the parts of a tag.
+    ->withConfiguredRule(PhpdocAlignFixer::class, [
+        'align' => 'left',
     ])
     ->withConfiguredRule(TrailingCommaInMultilineFixer::class, [
         'elements' => ['arguments', 'arrays', 'match', 'parameters'],

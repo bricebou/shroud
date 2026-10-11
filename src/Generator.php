@@ -37,9 +37,9 @@ final class Generator
     private array $memory = [];
 
     /**
-     * @param string            $locale      the Faker locale, which picks the lists of names and cities
-     * @param bool              $renumbering false to leave every id untouched
-     * @param LanguageInterface $language    the conventions that the shape-preserving replacement follows
+     * @param string $locale the Faker locale, which picks the lists of names and cities
+     * @param bool $renumbering false to leave every id untouched
+     * @param LanguageInterface $language the conventions that the shape-preserving replacement follows
      */
     public function __construct(
         private readonly string $salt,
