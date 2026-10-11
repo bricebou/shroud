@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Shroud\Tests\Unit\Strategy\Value;
 
+use Shroud\Declaration\Declaration;
+use Shroud\Declaration\Table;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Generator;
 use Shroud\Reference;
+use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;
 use Shroud\Strategy\Value\Keep;
@@ -182,9 +185,13 @@ final class ValueStrategiesTest extends StrategyTestCase
     public function testShapedTextFollowsTheReferencesOfThePlatform(): void
     {
         $generator = new Generator(self::SALT, platform: new TestPlatform());
+        $declaration = new Declaration([
+            new Table('people', 'id', [
+                'id' => new RenumberedId('person'),
+            ])]);
         $person = $generator->permutationFor('person')->apply(12);
 
-        self::assertMatchesRegularExpression("/^\\p{Lu}\\p{Ll}+ #person:{$person} {{name}}$/u", self::applyToString(new ShapedText(), 'See #person:12 {{name}}', self::context($generator)));
+        self::assertMatchesRegularExpression("/^\\p{Lu}\\p{Ll}+ #person:{$person} {{name}}$/u", self::applyToString(new ShapedText(), 'See #person:12 {{name}}', self::context($generator, declaration: $declaration)));
     }
 
     public function testShapedTextRefusesInvalidUtf8(): void

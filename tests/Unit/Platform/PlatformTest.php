@@ -6,8 +6,11 @@ namespace Shroud\Tests\Unit\Platform;
 
 use PHPUnit\Framework\TestCase;
 use Shroud\Context;
+use Shroud\Declaration\Declaration;
+use Shroud\Declaration\Table;
 use Shroud\Generator;
 use Shroud\Platform\Generic;
+use Shroud\Strategy\Reference\RenumberedId;
 
 final class PlatformTest extends TestCase
 {
@@ -29,12 +32,17 @@ final class PlatformTest extends TestCase
         self::assertSame($platform, new Generator('test salt', platform: $platform)->platform());
     }
 
-    public function testTheTestPlatformRenumbersItsReferences(): void
+    public function testTheTestPlatformRenumbersTheReferencesToRenumberedTypes(): void
     {
         $generator = new Generator('test salt');
-        $context = new Context('people', 'bio', '42', [], reference: null, generator: $generator);
+        $declaration = new Declaration([
+            new Table('people', 'id', [
+                'id' => new RenumberedId('person'),
+            ])]);
+        $context = new Context('people', 'bio', '42', [], reference: null, generator: $generator, declaration: $declaration);
         $person = $generator->permutationFor('person')->apply(12);
 
-        self::assertSame("See #person:{$person} and {{name}}", new TestPlatform()->renumberReferences('See #person:12 and {{name}}', $context));
+        self::assertSame("See #person:{$person}, #article:12 and {{name}}", new TestPlatform()->renumberReferences('See #person:12, #article:12 and {{name}}', $context));
+        self::assertSame('See #person:12', new TestPlatform()->renumberReferences('See #person:12', new Context('people', 'bio', '42', [], reference: null, generator: $generator)), 'nothing is renumbered in an empty declaration');
     }
 }

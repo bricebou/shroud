@@ -8,7 +8,8 @@ use Shroud\Context;
 use Shroud\Platform\PlatformInterface;
 
 /**
- * A made-up platform for the tests: template tags `{{name}}` are markup, and `#type:12` references the object 12 of a type.
+ * A made-up platform for the tests: template tags `{{name}}` are markup, and `#type:12` references
+ * the object 12 of a type, renumbered when the declaration renumbers that type.
  */
 final class TestPlatform implements PlatformInterface
 {
@@ -26,7 +27,9 @@ final class TestPlatform implements PlatformInterface
     {
         return preg_replace_callback(
             '/#([a-z]+):(\d+)/',
-            static fn (array $match): string => '#' . $match[1] . ':' . $context->generator->permutationFor($match[1])->apply((int) $match[2]),
+            static fn (array $match): string => $context->declaration->isRenumbered($match[1])
+                ? '#' . $match[1] . ':' . $context->generator->permutationFor($match[1])->apply((int) $match[2])
+                : $match[0],
             $text,
         ) ?? $text;
     }
