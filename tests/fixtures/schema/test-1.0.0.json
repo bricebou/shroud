@@ -1,0 +1,13 @@
+{
+    "people": {
+        "primaryKey": [
+            "id_person"
+        ],
+        "columns": {
+            "id_person": "bigint(21)",
+            "name": "text",
+            "email": "text",
+            "legacy": "text"
+        }
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "contacts": {
+        "primaryKey": [
+            "id_contact"
+        ],
+        "columns": {
+            "id_contact": "bigint(21)",
+            "id_person": "bigint(21)",
+            "first_name": "text",
+            "last_name": "text"
+        }
+    },
+    "people": {
+        "primaryKey": [
+            "id_person"
+        ],
+        "columns": {
+            "id_person": "bigint(21)",
+            "name": "text",
+            "email": "text"
+        }
+    }
+}

@@ -23,6 +23,7 @@
         "php": "^8.4",
         "ext-intl": "*",
         "ext-mbstring": "*",
+        "ext-pdo": "*",
         "fakerphp/faker": "^1.24"
     },
     "require-dev": {
