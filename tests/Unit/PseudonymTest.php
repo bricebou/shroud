@@ -47,7 +47,7 @@ final class PseudonymTest extends TestCase
 
         self::assertGreaterThanOrEqual(8, count($pseudonym->organizationWords));
         self::assertNotContains('', $pseudonym->organizationWords);
-        self::assertNotSame('', $pseudonym->domain);
+        self::assertMatchesRegularExpression('/^[a-z0-9-]+\.example$/', $pseudonym->domain, 'a reserved top-level domain');
         self::assertNotSame('', $pseudonym->street);
         self::assertNotSame('', $pseudonym->postalCode);
         self::assertNotSame('', $pseudonym->city);

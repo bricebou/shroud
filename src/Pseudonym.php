@@ -55,7 +55,8 @@ final readonly class Pseudonym
             [...Words::extract($organization), ...Words::lorem($faker, 8)],
             static fn (string $word): bool => $word !== '',
         ));
-        $domain = $faker->domainName();
+        // A reserved top-level domain: a fake host must not point at a real site.
+        $domain = Words::toSlug($faker->domainWord()) . '.example';
         // The suffix tells homonyms apart: two objects drawing the same names keep distinct
         // emails, as a unique key on the column requires.
         $handle = Words::toSlug($firstNames[0]) . '.' . Words::toSlug($lastNames[0]) . '-' . $suffix;
