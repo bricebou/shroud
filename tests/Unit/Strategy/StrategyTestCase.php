@@ -6,6 +6,7 @@ namespace Shroud\Tests\Unit\Strategy;
 
 use PHPUnit\Framework\TestCase;
 use Shroud\Context;
+use Shroud\Declaration\Declaration;
 use Shroud\Generator;
 use Shroud\Reference;
 use Shroud\Strategy\StrategyInterface;
@@ -28,8 +29,9 @@ abstract class StrategyTestCase extends TestCase
         string $key = '42',
         array $row = [],
         ?Reference $reference = new Reference('person', 42),
+        ?Declaration $declaration = null,
     ): Context {
-        return new Context('people', $column, $key, $row, $reference, $generator ?? new Generator(self::SALT));
+        return new Context('people', $column, $key, $row, $reference, $generator ?? new Generator(self::SALT), $declaration ?? new Declaration([]));
     }
 
     protected static function apply(StrategyInterface $strategy, mixed $value, ?Context $context = null): mixed

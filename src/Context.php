@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Shroud;
 
 use Faker\Generator as Faker;
+use Shroud\Declaration\Declaration;
 use Shroud\Exception\MissingReferenceException;
 
 /**
- * Carries what a strategy knows about the value it transforms:
- * its table, its column, its row, the object the row references, and the generator.
+ * Carries what a strategy knows about the value it transforms: its table, its column, its row,
+ * the object the row references, the generator and the declaration.
  */
 final readonly class Context
 {
@@ -17,6 +18,7 @@ final readonly class Context
      * @param string $key the key of the row, unique within its table
      * @param array<string, mixed> $row the whole row, as read
      * @param ?Reference $reference the object the row references, or null when it references none
+     * @param Declaration $declaration the declaration of the base, empty when a strategy runs alone
      */
     public function __construct(
         public string $table,
@@ -25,6 +27,7 @@ final readonly class Context
         public array $row,
         public ?Reference $reference,
         public Generator $generator,
+        public Declaration $declaration = new Declaration([]),
     ) {
     }
 

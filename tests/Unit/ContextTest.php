@@ -6,6 +6,8 @@ namespace Shroud\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Shroud\Context;
+use Shroud\Declaration\Declaration;
+use Shroud\Declaration\Table;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Generator;
 use Shroud\Reference;
@@ -57,6 +59,14 @@ final class ContextTest extends TestCase
 
         self::assertSame($generator->seedFaker('people', '42', 'value')->word(), $draw('42', 'value'));
         self::assertSame($draw('42', 'value'), $draw('42', 'value'));
+    }
+
+    public function testTheDeclarationIsEmptyUnlessGiven(): void
+    {
+        $declaration = new Declaration([new Table('people', 'id', [])]);
+
+        self::assertSame([], $this->context(new Generator('test salt'), reference: null)->declaration->tables());
+        self::assertSame($declaration, new Context('people', 'value', '42', [], reference: null, generator: new Generator('test salt'), declaration: $declaration)->declaration);
     }
 
     private function context(Generator $generator, ?Reference $reference): Context
