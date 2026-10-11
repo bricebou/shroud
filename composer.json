@@ -36,6 +36,11 @@
         "rector/rector": "^2.7",
         "symplify/easy-coding-standard": "^13.0"
     },
+    "bin": [
+        "bin/shroud-baseline",
+        "bin/shroud-diff",
+        "bin/shroud-dump"
+    ],
     "autoload": {
         "psr-4": {
             "Shroud\\": "src/"
@@ -64,7 +69,7 @@
         "check:cs": "ecs check --ansi",
         "check:rector": "rector process --dry-run --ansi",
         "check:static": "phpstan --memory-limit=-1",
-        "check:syntax": "parallel-lint --exclude vendor .",
+        "check:syntax": "parallel-lint --exclude vendor . bin/shroud-baseline bin/shroud-diff bin/shroud-dump",
         "fix": [
             "@fix:rector",
             "@fix:cs"

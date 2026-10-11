@@ -1,0 +1,79 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Writes a pseudonymised SQL dump of a MySQL or MariaDB base; `--help` describes the options.
+ */
+
+use Shroud\Adapter\Pdo\MysqlDump;
+use Shroud\Cli\Console;
+use Shroud\Cli\Database;
+
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $autoload) {
+    if (is_file($autoload)) {
+        require $autoload;
+        break;
+    }
+}
+
+$usage = <<<TXT
+Writes a pseudonymised SQL dump of a MySQL or MariaDB base.
+
+Usage:
+  shroud-dump [--connect[=<file>]] [--host=<host>] [--port=<port>] [--database=<base>]
+              [--user=<user>] [--password=<password>] [--dsn=<dsn>]
+              [--config=<file>] [--output=<file>] [--dry-run]
+
+{Database::USAGE}
+
+Other options:
+  --config    the configuration file of the project, which returns a Configuration object:
+              declaration of the tables, salt, locale, platform; shroud.php of the current directory by default
+  --output    the file to write; the standard output by default
+  --dry-run   reads the whole base and passes every row through the strategies without writing
+              anything, then reports the refusals by table, column and reason
+  -h, --help  this help
+
+The dump imports with mysql into an empty base. Every real password is cleared from it: to log
+into the imported site, create an administrator again with the tools of the platform.
+Exit code: 0 when the dump is written, or when the dry run passes; 1 when the dry run reports
+refusals; 2 on a usage or execution error.
+
+TXT;
+
+$options = getopt('h', [...Database::OPTIONS, 'config::', 'output::', 'dry-run', 'help']);
+if (isset($options['h']) || isset($options['help'])) {
+    fwrite(STDOUT, $usage);
+    exit(0);
+}
+
+Console::run(static function () use ($options, $usage): int {
+    $directory = Console::directory();
+    $configuration = Console::configuration($options, $directory);
+    $pdo = Console::connect($options, $configuration, $directory, $usage);
+    $dump = new MysqlDump($pdo, $configuration->declaration, $configuration->disguiser());
+    $started = microtime(as_float: true);
+    $progress = static function (string $table, int $rows): void {
+        fwrite(STDERR, sprintf("%-32s %8d row%s\n", $table, $rows, $rows === 1 ? '' : 's'));
+    };
+
+    if (array_key_exists('dry-run', $options)) {
+        $dryRun = $dump->dryRun($progress);
+        fwrite(STDERR, sprintf("Done in %.1f s\n\n", microtime(as_float: true) - $started));
+        fwrite(STDOUT, implode("\n", $dryRun->report()) . "\n");
+
+        return $dryRun->isClean() ? 0 : 1;
+    }
+
+    $file = Console::option($options, 'output');
+    $output = $file === null ? STDOUT : fopen($file, 'w');
+    if ($output === false) {
+        Console::fail('Cannot open the output file ' . $file);
+    }
+    $dump->write($output, $progress);
+    fwrite(STDERR, sprintf("Done in %.1f s\n", microtime(as_float: true) - $started));
+
+    return 0;
+});

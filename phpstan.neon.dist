@@ -4,3 +4,6 @@ parameters:
     paths:
         - src
         - tests
+        - bin/shroud-baseline
+        - bin/shroud-diff
+        - bin/shroud-dump

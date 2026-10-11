@@ -1,0 +1,123 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Compares the base of a site to its declaration and suggests what is missing; `--help` describes the options.
+ */
+
+use Shroud\Adapter\Pdo\SchemaReader;
+use Shroud\Cli\Console;
+use Shroud\Cli\Database;
+use Shroud\Exception\InvalidSchemaException;
+use Shroud\Schema\Baseline;
+use Shroud\Schema\Coverage;
+
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $autoload) {
+    if (is_file($autoload)) {
+        require $autoload;
+        break;
+    }
+}
+
+$usage = <<<TXT
+Compares the base of a site to its declaration, both ways, and suggests the declaration of
+what the base carries in addition: the diff of the site against the bare platform, ready to classify.
+
+Usage:
+  shroud-diff [--connect[=<file>]] [--host=<host>] [--port=<port>] [--database=<base>]
+              [--user=<user>] [--password=<password>] [--dsn=<dsn>]
+              [--config=<file>] [--write[=<file.php>]]
+
+{Database::USAGE}
+
+Other options:
+  --config    the configuration file of the project, which returns a Configuration object;
+              shroud.php of the current directory by default
+  --write     also writes the draft into this PHP file, created or replaced;
+              shroud.suggestions.php of the current directory without value.
+              The declaration of the site is never modified.
+  -h, --help  this help
+
+Three things are compared: the base of the site, its declaration, and the baseline, the frozen
+schema of the bare platform at the version of the site, shipped with the platform package. The
+baseline tells apart what the base carries of its own, extensions and added columns, from what
+belongs to the platform itself.
+
+Output: a preamble naming the three things compared; numbered sections, what is specific to the
+site, what the bare declaration misses, what is declared without existing, what has no effect;
+a summary; then, last, the draft: a complete PHP file returning a function that completes the
+declaration it receives, each column classified by the rules of the platform, its glossaries and
+its type, marked "@todo review" when a doubt remains. The draft is read before being folded
+into shroud.php, by copying its content or by applying it.
+Exit code, as diff: 0 when the declaration covers the base exactly, 1 on a gap, 2 on a usage or
+execution error.
+
+TXT;
+
+$options = getopt('h', [...Database::OPTIONS, 'config::', 'write::', 'help']);
+if (isset($options['h']) || isset($options['help'])) {
+    fwrite(STDOUT, $usage);
+    exit(0);
+}
+
+Console::run(static function () use ($options, $usage): int {
+    $directory = Console::directory();
+    $configurationFile = Console::configurationFile($options, $directory);
+    $configuration = Console::configuration($options, $directory);
+    $platform = $configuration->platform;
+    $pdo = Console::connect($options, $configuration, $directory, $usage);
+
+    $statement = $pdo->query('SELECT DATABASE()');
+    $name = $statement === false ? '?' : (string) $statement->fetchColumn();
+    $schema = new SchemaReader($pdo)->read();
+    $version = $platform->readVersion($pdo);
+    $declaration = $configuration->declaration;
+    $baseline = null;
+    if ($version !== null) {
+        try {
+            $baseline = Baseline::of($platform, $version);
+        } catch (InvalidSchemaException) {
+            // The platform package freezes no schema: no baseline.
+        }
+    }
+
+    // The preamble names the three things compared: the base, its declaration, the baseline.
+    $lines = [
+        sprintf('Base         %s: %d tables, %s', $name, count($schema->tables()), $version === null ? 'version of the platform unknown' : $platform->name() . ' ' . $version),
+        sprintf('Declaration  %s: %d tables', $configurationFile, count($declaration->tables())),
+    ];
+    if (! $baseline instanceof Baseline) {
+        $lines[] = 'Baseline     none, for want of a version or of a frozen schema: everything the base carries in addition is presented as specific to the site';
+    } elseif ($baseline->version === $version) {
+        $lines[] = sprintf('Baseline     bare %s %s, frozen schema shipped with the platform package: tells apart what belongs to the site from what belongs to the platform', $baseline->platform, $baseline->version);
+    } else {
+        $lines[] = sprintf('Baseline     bare %s %s, the frozen schema shipped with the platform package nearest to %s: tells apart what belongs to the site from what belongs to the platform', $baseline->platform, $baseline->version, $version);
+    }
+    fwrite(STDOUT, implode("\n", $lines) . "\n\n");
+
+    $coverage = Coverage::compare($schema, $declaration, $baseline);
+    $exit = $coverage->isComplete() ? 0 : 1;
+    $report = $coverage->report();
+    $summary = array_pop($report);
+    $report[] = $summary . sprintf(' Exit code %d.', $exit);
+    fwrite(STDOUT, implode("\n", $report) . "\n");
+
+    // The draft comes last, to copy as one block; --write also writes it to a file.
+    if ($coverage->hasUndeclared()) {
+        $draft = $configuration->draft()->file($coverage, $schema, $declaration, date('Y-m-d'));
+        $rule = str_repeat('-', 80);
+        if (array_key_exists('write', $options)) {
+            $target = Console::option($options, 'write') ?? $directory . '/shroud.suggestions.php';
+            if (file_put_contents($target, $draft) === false) {
+                Console::fail('Cannot write ' . $target);
+            }
+            fwrite(STDOUT, sprintf("\nDraft, written to %s; the declaration of the site is not modified.\n%s\n%s%s\n", $target, $rule, $draft, $rule));
+        } else {
+            fwrite(STDOUT, sprintf("\nDraft, to copy; --write writes it to shroud.suggestions.php.\n%s\n%s%s\n", $rule, $draft, $rule));
+        }
+    }
+
+    return $exit;
+});

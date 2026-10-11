@@ -7,7 +7,7 @@ use Rector\Config\RectorConfig;
 
 // The PHP set follows the floor declared in composer.json: keep both in step.
 return RectorConfig::configure()
-    ->withPaths([__DIR__ . '/src', __DIR__ . '/tests'])
+    ->withPaths([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin/shroud-baseline', __DIR__ . '/bin/shroud-diff', __DIR__ . '/bin/shroud-dump'])
     ->withRootFiles()
     ->withPhpSets(php84: true)
     ->withAttributesSets(phpunit: true)

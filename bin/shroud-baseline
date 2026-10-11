@@ -1,0 +1,79 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Freezes the schema of a bare platform, for the coverage of its declaration; `--help` describes the options.
+ */
+
+use Shroud\Adapter\Pdo\SchemaReader;
+use Shroud\Cli\Console;
+use Shroud\Cli\Database;
+
+foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $autoload) {
+    if (is_file($autoload)) {
+        require $autoload;
+        break;
+    }
+}
+
+$usage = <<<TXT
+Freezes the schema of a bare platform, tables, primary keys and typed columns, into the frozen
+schemas of the platform package: the baseline that shroud-diff compares a site against.
+
+Usage:
+  shroud-baseline [--connect[=<file>]] [--host=<host>] [--port=<port>] [--database=<base>]
+                  [--user=<user>] [--password=<password>] [--dsn=<dsn>]
+                  [--config=<file>] [--version=<x.y.z>] [--force]
+
+{Database::USAGE}
+
+Other options:
+  --config    the configuration file of the project, which names the platform;
+              shroud.php of the current directory by default
+  --version   the version of the platform to freeze; read from the base by the platform when absent
+  --force     replaces the file of a version already frozen
+  -h, --help  this help
+
+The base must be a bare install of the platform, without extension: what it carries is what the
+bare declaration of the platform must cover. The file is written where the platform keeps its
+frozen schemas, which is a directory of the platform package: run it from a checkout of that
+package. A version whose schema equals the previous frozen one needs no file.
+Exit code: 0 when the file is written, 2 on a usage or execution error.
+
+TXT;
+
+$options = getopt('h', [...Database::OPTIONS, 'config::', 'version::', 'force', 'help']);
+if (isset($options['h']) || isset($options['help'])) {
+    fwrite(STDOUT, $usage);
+    exit(0);
+}
+
+Console::run(static function () use ($options, $usage): int {
+    $directory = Console::directory();
+    $configuration = Console::configuration($options, $directory);
+    $platform = $configuration->platform;
+    $pdo = Console::connect($options, $configuration, $directory, $usage);
+
+    $version = Console::option($options, 'version') ?? $platform->readVersion($pdo);
+    if ($version === null) {
+        Console::fail(sprintf('The base does not tell its %s version: give it with --version', $platform->name()));
+    }
+    $path = $platform->frozenSchemas()->path($version);
+    if (is_file($path) && ! array_key_exists('force', $options)) {
+        Console::fail(sprintf('%s %s is already frozen in %s: --force replaces it', $platform->name(), $version, $path));
+    }
+
+    $schema = new SchemaReader($pdo)->read();
+    $frozenDirectory = dirname($path);
+    if (! is_dir($frozenDirectory) && ! mkdir($frozenDirectory, 0o755, recursive: true)) {
+        Console::fail('Cannot create ' . $frozenDirectory);
+    }
+    if (file_put_contents($path, $schema->toJson()) === false) {
+        Console::fail('Cannot write ' . $path);
+    }
+    fwrite(STDERR, sprintf("%s %s frozen: %d tables in %s\n", $platform->name(), $version, count($schema->tables()), $path));
+
+    return 0;
+});
