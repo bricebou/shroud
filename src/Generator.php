@@ -8,6 +8,8 @@ use Faker\Factory;
 use Faker\Generator as Faker;
 use Shroud\Language\LanguageInterface;
 use Shroud\Language\Plain;
+use Shroud\Platform\Generic;
+use Shroud\Platform\PlatformInterface;
 
 /**
  * Derives every random-looking draw from the salt alone, so that two runs give the same result.
@@ -40,12 +42,14 @@ final class Generator
      * @param string $locale the Faker locale, which picks the lists of names and cities
      * @param bool $renumbering false to leave every id untouched
      * @param LanguageInterface $language the conventions that the shape-preserving replacement follows
+     * @param PlatformInterface $platform the platform that owns the base, generic by default
      */
     public function __construct(
         private readonly string $salt,
         string $locale = Factory::DEFAULT_LOCALE,
         private readonly bool $renumbering = true,
         private readonly LanguageInterface $language = new Plain(),
+        private readonly PlatformInterface $platform = new Generic(),
     ) {
         $this->faker = Factory::create($locale);
     }
@@ -56,6 +60,14 @@ final class Generator
     public function language(): LanguageInterface
     {
         return $this->language;
+    }
+
+    /**
+     * Returns the platform that owns the base.
+     */
+    public function platform(): PlatformInterface
+    {
+        return $this->platform;
     }
 
     /**
