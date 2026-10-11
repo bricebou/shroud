@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Shroud;
 
 use Shroud\Declaration\Declaration;
+use Shroud\Exception\ShroudException;
 use Shroud\Exception\TruncatedTableException;
 use Shroud\Strategy\ObserverInterface;
 
@@ -49,6 +50,38 @@ final readonly class Disguiser
         }
 
         return $result;
+    }
+
+    /**
+     * Tries every column of a row and returns the refusals by column, instead of stopping at the first.
+     *
+     * A dry run over a whole base counts them by table, column and reason: an old base carries
+     * malformed data that only a full pass finds. An undeclared or truncated table still refuses.
+     *
+     * @param array<string, mixed> $row
+     *
+     * @return array<string, ShroudException> empty when every column passes
+     */
+    public function checkRow(string $tableName, array $row): array
+    {
+        $table = $this->declaration->getTable($tableName);
+        if ($table->truncated) {
+            throw new TruncatedTableException($tableName);
+        }
+        $key = $table->computeKey($row);
+        $reference = $table->reference?->resolveIn($row, $this->generator);
+
+        $refusals = [];
+        foreach ($row as $column => $value) {
+            try {
+                $context = new Context($table->name, $column, $key, $row, $reference, $this->generator, $this->declaration);
+                $table->getStrategyFor($column)->apply($value, $context);
+            } catch (ShroudException $exception) {
+                $refusals[$column] = $exception;
+            }
+        }
+
+        return $refusals;
     }
 
     /**
