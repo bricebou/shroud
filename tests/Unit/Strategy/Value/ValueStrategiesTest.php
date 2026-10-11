@@ -11,7 +11,9 @@ use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;
 use Shroud\Strategy\Value\Keep;
 use Shroud\Strategy\Value\ShapedDigits;
+use Shroud\Strategy\Value\ShapedText;
 use Shroud\Strategy\Value\ShiftedDate;
+use Shroud\Tests\Unit\Platform\TestPlatform;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
 
 final class ValueStrategiesTest extends StrategyTestCase
@@ -159,5 +161,37 @@ final class ValueStrategiesTest extends StrategyTestCase
             self::apply(new ShiftedDate(), '2008-03-02', self::context(reference: new Reference('person', 1))),
             self::apply(new ShiftedDate(), '2008-03-02', self::context(reference: new Reference('person', 2))),
         );
+    }
+
+    public function testShapedTextKeepsTheShapeAndNothingElse(): void
+    {
+        $text = self::applyToString(new ShapedText(), 'Zoé Kowalczyk, <b>née</b> en 1984 (réf. AB12)');
+
+        self::assertMatchesRegularExpression('/^\p{Lu}\p{Ll}+ \p{Lu}\p{Ll}+, <b>\p{Ll}+<\/b> \p{Ll}+ \d{4} \(\p{Ll}+\. \p{Lu}{2}\d{2}\)$/u', $text);
+        self::assertStringNotContainsString('Kowalczyk', $text);
+        self::assertStringNotContainsString('1984', $text);
+        self::assertSame($text, self::apply(new ShapedText(), 'Zoé Kowalczyk, <b>née</b> en 1984 (réf. AB12)'), 'deterministic');
+        self::assertNotSame($text, self::apply(new ShapedText(), 'Zoé Kowalczyk, <b>née</b> en 1984 (réf. AB12)', self::context(key: '43')), 'specific to the value');
+    }
+
+    public function testShapedTextNeedsNoReference(): void
+    {
+        self::assertMatchesRegularExpression('/^\p{Ll}+ \p{Ll}+$/u', self::applyToString(new ShapedText(), 'some words', self::context(reference: null)));
+    }
+
+    public function testShapedTextFollowsTheReferencesOfThePlatform(): void
+    {
+        $generator = new Generator(self::SALT, platform: new TestPlatform());
+        $person = $generator->permutationFor('person')->apply(12);
+
+        self::assertMatchesRegularExpression("/^\\p{Lu}\\p{Ll}+ #person:{$person} {{name}}$/u", self::applyToString(new ShapedText(), 'See #person:12 {{name}}', self::context($generator)));
+    }
+
+    public function testShapedTextRefusesInvalidUtf8(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('people.value: invalid UTF-8');
+
+        self::apply(new ShapedText(), "caf\xE9");
     }
 }
