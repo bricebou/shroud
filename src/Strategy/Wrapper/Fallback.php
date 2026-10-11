@@ -6,6 +6,7 @@ namespace Shroud\Strategy\Wrapper;
 
 use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
+use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\StrategyInterface;
 
 /**
@@ -14,7 +15,7 @@ use Shroud\Strategy\StrategyInterface;
  * Only an invalid value falls back: old bases carry malformed data that a column-wide strategy
  * cannot read. A missing reference stays an error of the declaration, and is not caught.
  */
-final readonly class Fallback implements StrategyInterface
+final readonly class Fallback implements CompositeInterface
 {
     public function __construct(
         private StrategyInterface $strategy,
@@ -29,5 +30,10 @@ final readonly class Fallback implements StrategyInterface
         } catch (InvalidValueException) {
             return $this->fallback->apply($value, $context);
         }
+    }
+
+    public function innerStrategies(): iterable
+    {
+        return [$this->strategy, $this->fallback];
     }
 }

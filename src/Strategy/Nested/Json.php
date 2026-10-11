@@ -7,6 +7,7 @@ namespace Shroud\Strategy\Nested;
 use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Strategy\AbstractTextStrategy;
+use Shroud\Strategy\CompositeInterface;
 
 /**
  * Transforms a JSON document key by key, and encodes it again.
@@ -14,13 +15,18 @@ use Shroud\Strategy\AbstractTextStrategy;
  * An empty object stays an object and a float keeps its fraction. A value that is not JSON is
  * refused: an old base that carries some declares a `Fallback`.
  */
-final class Json extends AbstractTextStrategy
+final class Json extends AbstractTextStrategy implements CompositeInterface
 {
     private const int ENCODING = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION;
 
     public function __construct(
         private readonly PerKey $content,
     ) {
+    }
+
+    public function innerStrategies(): iterable
+    {
+        return [$this->content];
     }
 
     protected function transform(string $value, Context $context): string

@@ -7,6 +7,7 @@ namespace Shroud\Strategy\Wrapper;
 use Shroud\Context;
 use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\InvalidValueException;
+use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\StrategyInterface;
 
 /**
@@ -17,7 +18,7 @@ use Shroud\Strategy\StrategyInterface;
  * the algorithm is refused, so that `Fallback` can handle columns mixing digests and plain values.
  * Salted password hashes (bcrypt, argon2) cannot keep a relation: declare them `Clear` or `Constant`.
  */
-final readonly class Hashed implements StrategyInterface
+final readonly class Hashed implements CompositeInterface
 {
     /**
      * @param string $algorithm any algorithm of `hash()`
@@ -51,6 +52,11 @@ final readonly class Hashed implements StrategyInterface
 
         // An uppercase digest stays uppercase.
         return strtolower($value) !== $value ? strtoupper($digest) : $digest;
+    }
+
+    public function innerStrategies(): iterable
+    {
+        return [$this->source];
     }
 
     /**

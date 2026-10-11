@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Nested;
 
 use Shroud\Context;
+use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\StrategyInterface;
 
 /**
  * Picks the strategy according to the value of another column of the row: the value of a setting
  * according to its name, the content of a field according to its type.
  */
-final readonly class ByColumn implements StrategyInterface
+final readonly class ByColumn implements CompositeInterface
 {
     /**
      * @param array<int|string, StrategyInterface> $cases
@@ -33,5 +34,10 @@ final readonly class ByColumn implements StrategyInterface
         $strategy = is_scalar($discriminant) ? ($this->cases[(string) $discriminant] ?? $this->default) : $this->default;
 
         return $strategy->apply($value, $context);
+    }
+
+    public function innerStrategies(): iterable
+    {
+        return [...array_values($this->cases), $this->default];
     }
 }

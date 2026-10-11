@@ -6,12 +6,13 @@ namespace Shroud\Strategy\Nested;
 
 use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
+use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\StrategyInterface;
 
 /**
  * Transforms an array key by key: each declared key with its strategy, the others with a common one.
  */
-final readonly class PerKey implements StrategyInterface
+final readonly class PerKey implements CompositeInterface
 {
     /**
      * @param array<int|string, StrategyInterface> $keys
@@ -40,5 +41,10 @@ final readonly class PerKey implements StrategyInterface
         }
 
         return $result;
+    }
+
+    public function innerStrategies(): iterable
+    {
+        return [...array_values($this->keys), $this->others];
     }
 }

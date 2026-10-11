@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Wrapper;
 
 use Shroud\Context;
+use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Keep;
 
@@ -15,7 +16,7 @@ use Shroud\Strategy\Value\Keep;
  * address, whatever the table: a public content that quotes a person quotes them the same way
  * in every row. The rest of the text does not change.
  */
-final readonly class WithoutEmails implements StrategyInterface
+final readonly class WithoutEmails implements CompositeInterface
 {
     private const string EMAIL = '/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/';
 
@@ -39,6 +40,11 @@ final readonly class WithoutEmails implements StrategyInterface
             static fn (array $match): string => $context->generator->seedFaker('email', strtolower($match[0]))->safeEmail(),
             $result,
         ) ?? $result;
+    }
+
+    public function innerStrategies(): iterable
+    {
+        return [$this->inner];
     }
 
     /**
