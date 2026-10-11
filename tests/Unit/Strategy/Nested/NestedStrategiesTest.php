@@ -80,7 +80,7 @@ final class NestedStrategiesTest extends StrategyTestCase
 
     public function testSerializedRefusesAnInvalidSerialization(): void
     {
-        foreach (['a:1:{truncated', '6forum'] as $value) {
+        foreach (['a:1:{truncated', 'not a blob'] as $value) {
             try {
                 self::apply(new Serialized(new PerKey([], new Keep())), $value);
                 self::fail('refused: ' . $value);
@@ -137,7 +137,7 @@ final class NestedStrategiesTest extends StrategyTestCase
     public function testAnInvalidBlobFallsBack(): void
     {
         $serialized = new Fallback(new Serialized(new PerKey([], new Keep())), new Clear());
-        self::assertSame('', self::apply($serialized, '6forum'));
+        self::assertSame('', self::apply($serialized, 'not a blob'));
         self::assertSame(serialize([
             'a' => 1,
         ]), self::apply($serialized, serialize([
