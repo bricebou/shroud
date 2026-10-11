@@ -1,0 +1,83 @@
+{
+    "name": "momh/shroud",
+    "description": "Deterministic, CMS-agnostic pseudonymisation of a relational database: consistent fake identities, reversible ids, shape-preserving text replacement, verifiable coverage.",
+    "license": "MIT",
+    "type": "library",
+    "keywords": [
+        "anonymisation",
+        "database",
+        "faker",
+        "gdpr",
+        "privacy",
+        "pseudonymisation"
+    ],
+    "homepage": "https://github.com/bricebou/shroud",
+    "authors": [
+        {
+            "name": "bricebou",
+            "email": "bricebou@momh.fr",
+            "homepage": "https://momh.fr"
+        }
+    ],
+    "require": {
+        "php": "^8.4"
+    },
+    "require-dev": {
+        "php-parallel-lint/php-parallel-lint": "^1.4",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.3",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^13.0",
+        "rector/rector": "^2.7",
+        "symplify/easy-coding-standard": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Shroud\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Shroud\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "check": [
+            "@check:syntax",
+            "@check:cs",
+            "@check:rector",
+            "@check:static",
+            "@test"
+        ],
+        "check:cs": "ecs check --ansi",
+        "check:rector": "rector process --dry-run --ansi",
+        "check:static": "phpstan --memory-limit=-1",
+        "check:syntax": "parallel-lint --exclude vendor .",
+        "fix": [
+            "@fix:rector",
+            "@fix:cs"
+        ],
+        "fix:cs": "ecs check --fix --ansi",
+        "fix:rector": "rector process --ansi",
+        "test": "phpunit --colors --testdox"
+    },
+    "scripts-descriptions": {
+        "check": "Run every check without changing anything: syntax, coding style, Rector, static analysis, tests",
+        "check:cs": "Check the coding style (ECS)",
+        "check:rector": "List the changes Rector would apply",
+        "check:static": "Run the static analysis (PHPStan)",
+        "check:syntax": "Check the PHP syntax (parallel-lint)",
+        "fix": "Apply Rector, then the coding style",
+        "fix:cs": "Fix the coding style (ECS)",
+        "fix:rector": "Apply the Rector rules",
+        "test": "Run the unit tests (PHPUnit)"
+    }
+}

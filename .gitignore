@@ -1,0 +1,8 @@
+# Dependencies: a library publishes neither vendor/ nor its lock file
+/vendor/
+/composer.lock
+
+# Local configurations and caches
+/phpstan.neon
+/phpunit.xml
+/.phpunit.cache/
