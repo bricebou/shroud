@@ -11,6 +11,7 @@ use Shroud\Exception\InvalidSchemaException;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Exception\ShroudException;
+use Shroud\Exception\TruncatedTableException;
 use Shroud\Exception\UndeclaredColumnException;
 use Shroud\Exception\UndeclaredTableException;
 
@@ -22,6 +23,7 @@ final class ExceptionsTest extends TestCase
     public static function exceptions(): iterable
     {
         yield 'undeclared table' => [new UndeclaredTableException('users'), 'Undeclared table: users'];
+        yield 'truncated table' => [new TruncatedTableException('visits'), 'Truncated table: visits has no row to transform'];
         yield 'undeclared column' => [new UndeclaredColumnException('users', 'email'), 'Undeclared column: users.email'];
         yield 'missing object reference' => [
             new MissingReferenceException('users', 'email'),
@@ -47,6 +49,7 @@ final class ExceptionsTest extends TestCase
         $invalidValue = new InvalidValueException('users', 'email', 'invalid UTF-8');
 
         self::assertSame('users', $undeclaredTable->table);
+        self::assertSame('visits', new TruncatedTableException('visits')->table);
         self::assertSame(['users', 'email'], [$undeclaredColumn->table, $undeclaredColumn->column]);
         self::assertSame(['users', 'email'], [$missingReference->table, $missingReference->column]);
         self::assertSame(['users', 'email', 'invalid UTF-8'], [$invalidValue->table, $invalidValue->column, $invalidValue->reason]);
