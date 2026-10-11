@@ -30,6 +30,8 @@ final class Generator
      */
     private array $permutations = [];
 
+    private ?Text $text = null;
+
     /**
      * The facts of shape that the strategies noted on each object during the observation
      * pass, by reference key then by fact key.
@@ -68,6 +70,14 @@ final class Generator
     public function platform(): PlatformInterface
     {
         return $this->platform;
+    }
+
+    /**
+     * Returns the shape-preserving replacement of texts, set up for the platform and the language.
+     */
+    public function text(): Text
+    {
+        return $this->text ??= new Text($this->platform, $this->language);
     }
 
     /**
