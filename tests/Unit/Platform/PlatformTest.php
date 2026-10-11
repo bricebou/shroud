@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Generator;
 use Shroud\Platform\Generic;
 use Shroud\Schema\Glossary\English;
@@ -27,6 +28,9 @@ final class PlatformTest extends TestCase
         self::assertSame([], $generic->frozenSchemas()->versions());
         self::assertNull($generic->readVersion(new \PDO('sqlite::memory:')));
         self::assertSame([], $generic->draftRules());
+        self::assertNull($generic->connectionFile());
+        $this->expectException(InvalidConfigurationException::class);
+        $generic->readConnection('config/database.ini');
         self::assertEquals([new English()], $generic->glossaries());
     }
 

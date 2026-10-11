@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Shroud\Tests\Unit\Platform;
 
+use Shroud\Adapter\Pdo\ConnectionSettings;
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Declaration\Table;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Platform\PlatformInterface;
 use Shroud\Schema\DraftRule;
 use Shroud\Schema\FrozenSchemas;
@@ -21,7 +23,8 @@ use Shroud\Strategy\Value\Keep;
 
 /**
  * A made-up platform for the tests: template tags `{{name}}` are markup, and `#type:12` references
- * the object 12 of a type, renumbered when the declaration renumbers that type. Its bare
+ * the object 12 of a type, renumbered when the declaration renumbers that type. Its connection
+ * file is `config/database.json`. Its bare
  * distribution is a table of people, frozen at versions 1.0.0 and 2.0.0 in `tests/fixtures/schema`.
  */
 final class TestPlatform implements PlatformInterface
@@ -66,6 +69,30 @@ final class TestPlatform implements PlatformInterface
     public function readVersion(\PDO $pdo): ?string
     {
         return null;
+    }
+
+    public function connectionFile(): string
+    {
+        return 'config/database.json';
+    }
+
+    public function readConnection(string $path): ConnectionSettings
+    {
+        if (! is_file($path)) {
+            throw new InvalidConfigurationException(sprintf('connection file not found: %s', $path));
+        }
+        $settings = json_decode((string) file_get_contents($path), associative: true);
+        if (! is_array($settings) || ! is_string($settings['host'] ?? null) || ! is_string($settings['database'] ?? null) || ! is_string($settings['user'] ?? null)) {
+            throw new InvalidConfigurationException(sprintf('%s does not hold the host, the database and the user', $path));
+        }
+
+        return new ConnectionSettings(
+            $settings['host'],
+            $settings['database'],
+            $settings['user'],
+            is_string($settings['password'] ?? null) ? $settings['password'] : null,
+            is_string($settings['port'] ?? null) ? $settings['port'] : '',
+        );
     }
 
     public function draftRules(): array

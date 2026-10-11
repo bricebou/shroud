@@ -1,0 +1,7 @@
+{
+    "host": "db",
+    "port": "3307",
+    "database": "site",
+    "user": "site",
+    "password": "not a real password"
+}

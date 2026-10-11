@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Shroud\Platform;
 
+use Shroud\Adapter\Pdo\ConnectionSettings;
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
 use Shroud\Schema\DraftRule;
@@ -57,6 +58,18 @@ interface PlatformInterface
      * Reads the version of the platform installed on an open base, or null when the base does not tell.
      */
     public function readVersion(\PDO $pdo): ?string;
+
+    /**
+     * Returns the path of the connection file of the platform, relative to the root of a site, or null when it has none.
+     */
+    public function connectionFile(): ?string;
+
+    /**
+     * Reads the connection settings of a site in its connection file, without executing it.
+     *
+     * @throws \Shroud\Exception\InvalidConfigurationException when the file cannot be read
+     */
+    public function readConnection(string $path): ConnectionSettings;
 
     /**
      * Lists the rules of the platform for drafting a declaration, tried before the generic ones.

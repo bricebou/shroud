@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Shroud\Platform;
 
+use Shroud\Adapter\Pdo\ConnectionSettings;
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Schema\FrozenSchemas;
 use Shroud\Schema\Glossary\English;
 
@@ -43,6 +45,16 @@ final class Generic implements PlatformInterface
     public function readVersion(\PDO $pdo): ?string
     {
         return null;
+    }
+
+    public function connectionFile(): ?string
+    {
+        return null;
+    }
+
+    public function readConnection(string $path): ConnectionSettings
+    {
+        throw new InvalidConfigurationException('the generic platform has no connection file');
     }
 
     public function draftRules(): array
