@@ -22,6 +22,9 @@ final class PlatformTest extends TestCase
         self::assertSame('generic', $generic->name());
         self::assertSame([], $generic->preservedMarkup());
         self::assertSame('See #person:12 and {{name}}', $generic->renumberReferences('See #person:12 and {{name}}', $context));
+        self::assertSame([], $generic->bareDeclaration()->tables());
+        self::assertSame([], $generic->frozenSchemas()->versions());
+        self::assertNull($generic->readVersion(new \PDO('sqlite::memory:')));
     }
 
     public function testTheGeneratorIsGenericUnlessGivenAPlatform(): void

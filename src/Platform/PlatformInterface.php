@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Shroud\Platform;
 
 use Shroud\Context;
+use Shroud\Declaration\Declaration;
+use Shroud\Schema\FrozenSchemas;
 
 /**
  * Gathers what the core needs to know about the CMS, or the application, that owns the base.
@@ -38,4 +40,19 @@ interface PlatformInterface
      * number of that author. The text comes back unchanged when the platform embeds no reference.
      */
     public function renumberReferences(string $text, Context $context): string;
+
+    /**
+     * Returns the declaration of the bare platform: its own tables, before any extension or site column.
+     */
+    public function bareDeclaration(): Declaration;
+
+    /**
+     * Returns the frozen schemas of the bare platform, one per version whose schema changed.
+     */
+    public function frozenSchemas(): FrozenSchemas;
+
+    /**
+     * Reads the version of the platform installed on an open base, or null when the base does not tell.
+     */
+    public function readVersion(\PDO $pdo): ?string;
 }
