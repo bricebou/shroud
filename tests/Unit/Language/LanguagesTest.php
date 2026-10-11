@@ -22,11 +22,23 @@ final class LanguagesTest extends TestCase
         self::assertSame('', $french->markDiacritic(''));
     }
 
-    public function testPlainMarksNothing(): void
+    public function testFrenchElidesTheArticlesThePronounsAndQue(): void
+    {
+        $elided = new French()->elidedWords();
+
+        self::assertContains('l', $elided);
+        self::assertContains('d', $elided);
+        self::assertContains('qu', $elided);
+        self::assertContains('lorsqu', $elided);
+        self::assertNotContains('a', $elided);
+    }
+
+    public function testPlainMarksNothingAndElidesNothing(): void
     {
         $plain = new Plain();
 
         self::assertSame('ete', $plain->markDiacritic('ete'));
         self::assertSame('', $plain->markDiacritic(''));
+        self::assertSame([], $plain->elidedWords());
     }
 }

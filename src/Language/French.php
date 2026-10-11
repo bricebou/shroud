@@ -29,6 +29,12 @@ final class French implements LanguageInterface
         'C' => 'Ç',
     ];
 
+    /**
+     * The words elided before a vowel, "c'est", "d'Aubigné", "l'Oréal", "qu'importe": ce, de, je,
+     * la, le, me, ne, se, te, que and its compounds.
+     */
+    private const array ELIDED_WORDS = ['c', 'd', 'j', 'l', 'm', 'n', 's', 't', 'qu', 'jusqu', 'lorsqu', 'puisqu', 'quoiqu'];
+
     public function markDiacritic(string $word): string
     {
         $length = strlen($word);
@@ -39,5 +45,10 @@ final class French implements LanguageInterface
         }
 
         return $word;
+    }
+
+    public function elidedWords(): array
+    {
+        return self::ELIDED_WORDS;
     }
 }

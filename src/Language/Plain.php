@@ -13,4 +13,9 @@ final class Plain implements LanguageInterface
     {
         return $word;
     }
+
+    public function elidedWords(): array
+    {
+        return [];
+    }
 }
