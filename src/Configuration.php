@@ -59,6 +59,17 @@ final readonly class Configuration
     }
 
     /**
+     * Returns a copy of the configuration with another salt.
+     *
+     * A random salt that is kept nowhere makes a dump that nobody, not even the holder of the
+     * project, can relate to the original base: the mode towards anonymisation.
+     */
+    public function withSalt(string $salt): self
+    {
+        return new self($this->declaration, $salt, $this->locale, $this->language, $this->platform, $this->glossaries);
+    }
+
+    /**
      * Assembles the generator of the project; without renumbering on request.
      */
     public function generator(bool $renumbering = true): Generator

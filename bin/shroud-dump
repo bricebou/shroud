@@ -25,7 +25,7 @@ Writes a pseudonymised SQL dump of a MySQL or MariaDB base.
 Usage:
   shroud-dump [--connect[=<file>]] [--host=<host>] [--port=<port>] [--database=<base>]
               [--user=<user>] [--password=<password>] [--dsn=<dsn>]
-              [--config=<file>] [--output=<file>] [--dry-run]
+              [--config=<file>] [--output=<file>] [--dry-run] [--random-salt]
 
 {$connection}
 
@@ -35,6 +35,10 @@ Other options:
   --output    the file to write; the standard output by default
   --dry-run   reads the whole base and passes every row through the strategies without writing
               anything, then reports the refusals by table, column and reason
+  --random-salt
+              replaces the salt of the project by one drawn at random and kept nowhere: the dump
+              cannot be related to the original base, not even by the holder of the project.
+              For a base handed to a third party. The ids are still renumbered, consistently.
   -h, --help  this help
 
 The dump imports with mysql into an empty base. Every real password is cleared from it: to log
@@ -44,7 +48,7 @@ refusals; 2 on a usage or execution error.
 
 TXT;
 
-$options = getopt('h', [...Database::OPTIONS, 'config::', 'output::', 'dry-run', 'help']);
+$options = getopt('h', [...Database::OPTIONS, 'config::', 'output::', 'dry-run', 'random-salt', 'help']);
 if (isset($options['h']) || isset($options['help'])) {
     fwrite(STDOUT, $usage);
     exit(0);
@@ -53,6 +57,11 @@ if (isset($options['h']) || isset($options['help'])) {
 Console::run(static function () use ($options, $usage): int {
     $directory = Console::directory();
     $configuration = Console::configuration($options, $directory);
+    if (array_key_exists('random-salt', $options)) {
+        // Drawn here, used for this run, and forgotten with the process.
+        $configuration = $configuration->withSalt(bin2hex(random_bytes(32)));
+        fwrite(STDERR, "Random salt: the dump cannot be related to the base, by anyone\n");
+    }
     $pdo = Console::connect($options, $configuration, $directory, $usage);
     $dump = new MysqlDump($pdo, $configuration->declaration, $configuration->disguiser());
     $started = microtime(as_float: true);

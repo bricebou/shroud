@@ -55,6 +55,23 @@ final class ConfigurationTest extends TestCase
         self::assertStringContainsString("'nom' => new ShapedText(), // @todo review", new Configuration($declaration, 'salt', platform: new TestPlatform())->draft()->table($table, $declaration), 'the platform glossaries, English alone');
     }
 
+    public function testAnotherSaltGivesAnotherConfigurationAndAnotherResult(): void
+    {
+        $configuration = Configuration::fromFile(__DIR__ . '/../fixtures/project/shroud.php');
+        $other = $configuration->withSalt(bin2hex(random_bytes(32)));
+        $row = [
+            'id_person' => '1',
+            'name' => 'Zoé Kowalczyk',
+            'email' => '',
+            'institution' => '',
+        ];
+
+        self::assertNotSame($configuration->salt, $other->salt);
+        self::assertSame($configuration->declaration, $other->declaration);
+        self::assertSame($configuration->platform, $other->platform);
+        self::assertNotSame($configuration->disguiser()->disguiseRow('people', $row), $other->disguiser()->disguiseRow('people', $row));
+    }
+
     public function testTheDefaultsAreGenericAndPlain(): void
     {
         $configuration = new Configuration(new Declaration([]), 'salt');
