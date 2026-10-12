@@ -12,6 +12,9 @@ use Shroud\Strategy\StrategyInterface;
 
 /**
  * Transforms an array key by key: each declared key with its strategy, the others with a common one.
+ *
+ * With `deep`, an array under an undeclared key is walked the same way, at any depth: the declared
+ * keys apply wherever they sit, and the common strategy to every other leaf.
  */
 final readonly class PerKey implements RelayingObserverInterface
 {
@@ -21,6 +24,7 @@ final readonly class PerKey implements RelayingObserverInterface
     public function __construct(
         private array $keys,
         private StrategyInterface $others,
+        private bool $deep = false,
     ) {
     }
 
@@ -38,7 +42,9 @@ final readonly class PerKey implements RelayingObserverInterface
 
         $result = [];
         foreach ($value as $key => $item) {
-            $result[$key] = ($this->keys[$key] ?? $this->others)->apply($item, $context);
+            $result[$key] = $this->deep && is_array($item) && ! isset($this->keys[$key])
+                ? $this->apply($item, $context)
+                : ($this->keys[$key] ?? $this->others)->apply($item, $context);
         }
 
         return $result;
@@ -53,6 +59,10 @@ final readonly class PerKey implements RelayingObserverInterface
             return;
         }
         foreach ($value as $key => $item) {
+            if ($this->deep && is_array($item) && ! isset($this->keys[$key])) {
+                $this->observe($item, $context);
+                continue;
+            }
             Observation::relay($this->keys[$key] ?? $this->others, $item, $context);
         }
     }

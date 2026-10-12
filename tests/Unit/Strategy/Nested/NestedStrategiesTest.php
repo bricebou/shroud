@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace Shroud\Tests\Unit\Strategy\Nested;
 
+use Shroud\Declaration\Declaration;
+use Shroud\Declaration\Table;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\InvalidValueException;
+use Shroud\Generator;
 use Shroud\Strategy\Nested\ByColumn;
+use Shroud\Strategy\Nested\Delimited;
 use Shroud\Strategy\Nested\Json;
 use Shroud\Strategy\Nested\PerKey;
 use Shroud\Strategy\Nested\Serialized;
 use Shroud\Strategy\Pseudonym\Email;
+use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;
 use Shroud\Strategy\Value\Keep;
 use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Wrapper\Fallback;
+use Shroud\Strategy\Wrapper\WithoutEmails;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
 
 final class NestedStrategiesTest extends StrategyTestCase
@@ -187,5 +194,65 @@ final class NestedStrategiesTest extends StrategyTestCase
         self::assertSame('Lyon', self::apply($value, 'Lyon', self::context(row: [
             'name' => null,
         ])));
+    }
+
+    public function testPerKeyCanWalkNestedArrays(): void
+    {
+        $value = [
+            'email' => 'a@example-real.test',
+            'contacts' => [
+                'main' => [
+                    'email' => 'b@example-real.test',
+                    'note' => 'Write to c@example-real.test',
+                ],
+            ],
+        ];
+
+        $shallow = self::apply(new PerKey([
+            'email' => new Clear(),
+        ], new WithoutEmails()), $value);
+        $deep = self::apply(new PerKey([
+            'email' => new Clear(),
+        ], new WithoutEmails(), deep: true), $value);
+
+        self::assertIsArray($shallow);
+        self::assertSame($value['contacts'], $shallow['contacts'], 'shallow: the nested array passes through the common strategy untouched');
+        self::assertIsArray($deep);
+        self::assertSame('', $deep['email']);
+        self::assertIsArray($deep['contacts']);
+        self::assertIsArray($deep['contacts']['main']);
+        self::assertSame('', $deep['contacts']['main']['email'], 'deep: the declared key applies at any depth');
+        self::assertIsString($deep['contacts']['main']['note']);
+        self::assertStringNotContainsString('c@example-real.test', $deep['contacts']['main']['note']);
+    }
+
+    public function testDelimitedAppliesTheStrategyToEachItemAndKeepsTheShape(): void
+    {
+        $generator = new Generator(self::SALT);
+        $declaration = new Declaration([
+            new Table('posts', 'id', [
+                'id' => new RenumberedId('post'),
+            ])]);
+        $context = self::context($generator, declaration: $declaration);
+        $permute = static fn (int $id): int => $generator->permutationFor('post')->apply($id);
+
+        self::assertSame(sprintf('%d,%d,%d', $permute(12), $permute(13), $permute(14)), self::apply(new Delimited(',', new RenumberedId('post')), '12,13,14', $context));
+        self::assertSame(sprintf('%d, %d,', $permute(12), $permute(13)), self::apply(new Delimited(',', new RenumberedId('post')), '12, 13,', $context), 'blanks and empty items stay');
+        self::assertSame((string) $permute(25), self::apply(new Delimited(',', new RenumberedId('post')), '25', $context), 'a single id is a list of one');
+        self::assertSame('', self::apply(new Delimited(',', new RenumberedId('post')), '', $context));
+    }
+
+    public function testDelimitedRefusesAnItemItsStrategyRefuses(): void
+    {
+        $this->expectException(InvalidValueException::class);
+
+        self::apply(new Delimited(',', new RenumberedId('post')), '12,abc');
+    }
+
+    public function testDelimitedNeedsASeparator(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        new Delimited('', new Keep());
     }
 }
