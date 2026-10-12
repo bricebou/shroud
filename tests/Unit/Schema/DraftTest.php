@@ -210,4 +210,79 @@ final class DraftTest extends TestCase
         self::assertTrue($completed->has('contacts'));
         self::assertSame(['id_person', 'former', 'institution', 'recovery_code'], array_keys($completed->getTable('people')->columns));
     }
+
+    /**
+     * A WordPress-like schema: keys of key/value tables, prefixes that repeat the table, numbers named like texts.
+     */
+    public function testTheShapesOfAWordPressSchemaAreRecognised(): void
+    {
+        $users = new TableSchema('wp_users', ['ID'], [
+            'ID' => 'bigint(20) unsigned',
+            'user_login' => 'varchar(60)',
+            'user_pass' => 'varchar(255)',
+            'user_nicename' => 'varchar(50)',
+            'user_email' => 'varchar(100)',
+            'user_url' => 'varchar(100)',
+            'user_activation_key' => 'varchar(255)',
+            'user_status' => 'int(11)',
+            'display_name' => 'varchar(250)',
+        ]);
+        $meta = new TableSchema('wp_usermeta', ['umeta_id'], [
+            'umeta_id' => 'bigint(20) unsigned',
+            'meta_key' => 'varchar(255)',
+            'meta_value' => 'longtext',
+        ]);
+        $links = new TableSchema('wp_links', ['link_id'], [
+            'link_id' => 'bigint(20) unsigned',
+            'link_url' => 'varchar(255)',
+            'link_name' => 'varchar(255)',
+            'link_owner' => 'bigint(20) unsigned',
+            'link_rating' => 'int(11)',
+            'link_updated' => 'datetime',
+            'link_visible' => 'varchar(20)',
+        ]);
+        $orders = new TableSchema('wp_wc_orders', ['id'], [
+            'id' => 'bigint(20) unsigned',
+            'post_status' => 'varchar(20)',
+            'billing_email' => 'varchar(320)',
+            'ip_address' => 'varchar(100)',
+            'user_agent' => 'text',
+            'transaction_id' => 'varchar(100)',
+            'new_order_email_sent' => 'tinyint(1)',
+        ]);
+        $draft = new Draft(new Generic());
+        $declaration = new Declaration([]);
+
+        $code = $draft->table($users, $declaration);
+        self::assertStringContainsString("'user_login' => new Login(),", $code);
+        self::assertStringContainsString("'user_pass' => new Clear(),", $code);
+        self::assertStringContainsString("'user_nicename' => new Login(),", $code);
+        self::assertStringContainsString("'user_email' => new Email(),\n", $code, 'sure: the table says whose email it is');
+        self::assertStringContainsString("'user_url' => new Url(keepHost: false), // @todo review", $code);
+        self::assertStringContainsString("'user_activation_key' => new Clear(),", $code);
+        self::assertStringContainsString("'user_status' => new Keep(),", $code);
+        self::assertStringContainsString("'display_name' => new FullName(), // @todo review", $code);
+        self::assertStringEndsWith("], ReferenceColumns::fromFixedType('user', 'ID')),", $code);
+
+        $code = $draft->table($meta, $declaration);
+        self::assertStringContainsString("'meta_key' => new Keep(),", $code);
+        self::assertStringContainsString("'meta_value' => new ByColumn('meta_key', [], new Fallback(new Serialized(new PerKey([], new Keep())), new Keep())), // @todo review", $code);
+
+        $code = $draft->table($links, $declaration);
+        self::assertStringContainsString("'link_url' => new Url(keepHost: false), // @todo review", $code);
+        self::assertStringContainsString("'link_owner' => new Keep(),", $code);
+        self::assertStringContainsString("'link_rating' => new Keep(),", $code);
+        self::assertStringContainsString("'link_updated' => new Keep(),", $code);
+        self::assertStringNotContainsString("'link_visible' => new Url", $code);
+        self::assertStringNotContainsString("'link_name' => new FullName", $code, 'the name of a link is not that of a person');
+
+        $code = $draft->table($orders, $declaration);
+        self::assertStringContainsString("'post_status' => new Keep(),", $code);
+        self::assertStringContainsString("'billing_email' => new Email(), // @todo review", $code);
+        self::assertStringContainsString("'ip_address' => new Clear(),", $code);
+        self::assertStringContainsString("'user_agent' => new Clear(),", $code);
+        self::assertStringContainsString("'transaction_id' => new Keep(),", $code, 'an id shape wins, the glossary does not see it');
+        self::assertStringContainsString("'new_order_email_sent' => new Keep(),", $code, 'a number takes no text strategy');
+        self::assertStringEndsWith("], ReferenceColumns::fromFixedType('order', 'id')),", $code);
+    }
 }

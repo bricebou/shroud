@@ -9,6 +9,9 @@ use Shroud\Declaration\ReferenceColumns;
 use Shroud\Declaration\Table;
 use Shroud\Platform\PlatformInterface;
 use Shroud\Schema\Glossary\GlossaryInterface;
+use Shroud\Strategy\Nested\ByColumn;
+use Shroud\Strategy\Nested\PerKey;
+use Shroud\Strategy\Nested\Serialized;
 use Shroud\Strategy\Pseudonym\City;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FirstName;
@@ -25,6 +28,7 @@ use Shroud\Strategy\Value\Keep;
 use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Value\ShapedText;
 use Shroud\Strategy\Value\ShiftedDate;
+use Shroud\Strategy\Wrapper\Fallback;
 
 /**
  * Proposes, as PHP code, the declaration of what a base carries and a declaration ignores.
@@ -61,6 +65,10 @@ final readonly class Draft
         'Street' => Street::class,
         'Url' => Url::class,
         'RenumberedId' => RenumberedId::class,
+        'ByColumn' => ByColumn::class,
+        'PerKey' => PerKey::class,
+        'Serialized' => Serialized::class,
+        'Fallback' => Fallback::class,
         'Declaration' => Declaration::class,
         'ReferenceColumns' => ReferenceColumns::class,
         'Table' => Table::class,
@@ -69,7 +77,17 @@ final readonly class Draft
     /**
      * The strategies that draw no pseudonym: a table made of them only needs no reference.
      */
-    private const array IMPERSONAL = ['Keep', 'Clear', 'Constant', 'ShapedText', 'ShapedDigits', 'ShiftedDate', 'RenumberedId', 'RenumberedPolymorphicId', 'EmbeddedReferences'];
+    private const array IMPERSONAL = ['Keep', 'Clear', 'Constant', 'ShapedText', 'ShapedDigits', 'ShiftedDate', 'RenumberedId', 'RenumberedPolymorphicId', 'EmbeddedReferences', 'ByColumn', 'Fallback'];
+
+    /**
+     * The SQL types of numbers, which take no text strategy.
+     */
+    private const array NUMERIC_TYPES = ['tinyint', 'smallint', 'mediumint', 'int', 'integer', 'bigint', 'decimal', 'numeric', 'float', 'double', 'real', 'bit', 'boolean', 'bool', 'year'];
+
+    /**
+     * The SQL types of dates, which take no text strategy but a shift.
+     */
+    private const array DATE_TYPES = ['date', 'datetime', 'timestamp', 'time'];
 
     /**
      * @var list<GlossaryInterface>
@@ -223,11 +241,12 @@ final readonly class Draft
     }
 
     /**
-     * Proposes a strategy for a column: the rules of the platform, then the ids, then the glossaries, then the type.
+     * Proposes a strategy for a column: the rules of the platform, then the ids, the key/value pairs,
+     * the glossaries, then the type; the SQL type of a number or a date always has the last word.
      *
      * @return array{string, bool} the code of the strategy, and whether it is to review
      */
-    private function propose(TableSchema $table, string $column, string $type, Declaration $declaration): array
+    private function propose(TableSchema $table, string $column, string $sqlType, Declaration $declaration): array
     {
         foreach ($this->platform->draftRules() as $rule) {
             if ($rule->matches($column, $table)) {
@@ -239,23 +258,36 @@ final readonly class Draft
         if (preg_match('/^id_(.+)$|^(.+)_id$/', $name, $match) === 1) {
             $type = $match[1] !== '' ? $match[1] : $match[2];
 
-            return $declaration->isRenumbered($type) ? [sprintf('new RenumberedId(%s)', $this->quote($type)), false] : ['new Keep()', false];
+            return $declaration->isRenumbered($type) ? [sprintf('new RenumberedId(%s)', self::quote($type)), false] : ['new Keep()', false];
         }
 
-        foreach ($this->glossaries as $glossary) {
-            foreach ($glossary->rules() as $rule) {
-                if ($rule->matches($column, $table)) {
-                    return [$rule->strategy, $rule->review];
+        // The value of a key/value table, `meta_value` beside `meta_key`: its strategy depends on the key.
+        if (preg_match('/^(.*)value$/', $name, $match) === 1) {
+            foreach (['key', 'name'] as $suffix) {
+                foreach ([$match[1] . $suffix, $match[1] . '_' . $suffix] as $key) {
+                    if ($key !== $suffix && $table->hasColumn($key)) {
+                        return [sprintf('new ByColumn(%s, [], new Fallback(new Serialized(new PerKey([], new Keep())), new Keep()))', self::quote($key)), true];
+                    }
+                }
+            }
+        }
+
+        $base = strtolower((string) preg_replace('/\(.*$/', '', $sqlType));
+        foreach ($this->namesToTry($table, $name) as $candidate) {
+            foreach ($this->glossaries as $glossary) {
+                foreach ($glossary->rules() as $rule) {
+                    if ($rule->matches($candidate, $table)) {
+                        return $this->fitType($rule->strategy, $rule->review, $base);
+                    }
                 }
             }
         }
 
         // Then the type: a number or a date is kept, a free text is to review.
-        $sqlType = strtolower((string) preg_replace('/\(.*$/', '', $type));
-        if (in_array($sqlType, ['tinyint', 'smallint', 'mediumint', 'int', 'integer', 'bigint', 'decimal', 'float', 'double', 'bit', 'date', 'datetime', 'timestamp', 'time', 'year', 'enum', 'set', 'boolean'], strict: true)) {
+        if (in_array($base, [...self::NUMERIC_TYPES, ...self::DATE_TYPES, 'enum', 'set'], strict: true)) {
             return ['new Keep()', false];
         }
-        if (in_array($sqlType, ['char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext'], strict: true)) {
+        if (in_array($base, ['char', 'varchar', 'tinytext', 'text', 'mediumtext', 'longtext'], strict: true)) {
             return ['new ShapedText()', true];
         }
 
@@ -263,14 +295,76 @@ final readonly class Draft
     }
 
     /**
-     * Returns the code of the reference of a table whose simple primary key is `id_xxx` or `xxx_id`, or nothing.
+     * Lists the names the glossaries try: the name without the prefix that repeats the table, the surer hint, then the column name.
+     *
+     * `user_email` in `wp_users` is tried as `email` first, `comment_author` in `wp_comments` as `author`;
+     * `post_name` in `wp_posts` is not tried as `name`.
+     *
+     * @return list<string>
+     */
+    private function namesToTry(TableSchema $table, string $name): array
+    {
+        $segments = explode('_', strtolower($table->name));
+        $singular = $this->singular(end($segments));
+        $prefix = $singular . '_';
+        // `post_name` is the name of the post, its slug, not that of a person: a bare `name` is not tried.
+        if ($singular !== '' && str_starts_with($name, $prefix) && strlen($name) > strlen($prefix) && $name !== $prefix . 'name') {
+            return [substr($name, strlen($prefix)), $name];
+        }
+
+        return [$name];
+    }
+
+    /**
+     * Keeps a proposal that fits the SQL type, or falls back to Keep: a number takes no text strategy, a date only a shift.
+     *
+     * @return array{string, bool}
+     */
+    private function fitType(string $strategy, bool $review, string $sqlType): array
+    {
+        $class = (string) preg_replace('/^new |\(.*$/', '', $strategy);
+        $fits = match (true) {
+            in_array($sqlType, self::NUMERIC_TYPES, strict: true) => in_array($class, ['Keep', 'Clear', 'RenumberedId'], strict: true),
+            in_array($sqlType, self::DATE_TYPES, strict: true) => in_array($class, ['Keep', 'Clear', 'ShiftedDate'], strict: true),
+            default => true,
+        };
+
+        return $fits ? [$strategy, $review] : ['new Keep()', false];
+    }
+
+    /**
+     * Turns the last segment of a table name into a singular: `users` into `user`, `addresses` into `address`.
+     */
+    private function singular(string $word): string
+    {
+        return match (true) {
+            str_ends_with($word, 'ies') => substr($word, 0, -3) . 'y',
+            str_ends_with($word, 'sses') => substr($word, 0, -2),
+            str_ends_with($word, 's') && ! str_ends_with($word, 'ss') => substr($word, 0, -1),
+            default => $word,
+        };
+    }
+
+    /**
+     * Returns the code of the reference of a table with a simple primary key, or nothing.
+     *
+     * The type is the one `id_xxx` or `xxx_id` names; for a key named `id`, the singular of the last
+     * segment of the table name, `user` for `wp_users`.
      */
     private function reference(TableSchema $table): ?string
     {
-        if (count($table->primaryKey) !== 1 || preg_match('/^id_(.+)$|^(.+)_id$/', strtolower($table->primaryKey[0]), $match) !== 1) {
+        if (count($table->primaryKey) !== 1) {
             return null;
         }
-        $type = $match[1] !== '' ? $match[1] : $match[2];
+        $key = strtolower($table->primaryKey[0]);
+        if (preg_match('/^id_(.+)$|^(.+)_id$/', $key, $match) === 1) {
+            $type = $match[1] !== '' ? $match[1] : $match[2];
+        } elseif ($key === 'id') {
+            $segments = explode('_', strtolower($table->name));
+            $type = $this->singular(end($segments));
+        } else {
+            return null;
+        }
 
         return sprintf('ReferenceColumns::fromFixedType(%s, %s)', $this->quote($type), $this->quote($table->primaryKey[0]));
     }
