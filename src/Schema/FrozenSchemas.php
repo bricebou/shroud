@@ -52,8 +52,11 @@ final readonly class FrozenSchemas
     public function latest(): string
     {
         $versions = $this->versions();
+        if ($versions === []) {
+            throw $this->nothingFrozen();
+        }
 
-        return $versions[array_key_last($versions)] ?? throw $this->nothingFrozen();
+        return $versions[array_key_last($versions)];
     }
 
     /**
