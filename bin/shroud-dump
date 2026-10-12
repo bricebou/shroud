@@ -18,6 +18,7 @@ foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php
     }
 }
 
+$connection = Database::USAGE;
 $usage = <<<TXT
 Writes a pseudonymised SQL dump of a MySQL or MariaDB base.
 
@@ -26,7 +27,7 @@ Usage:
               [--user=<user>] [--password=<password>] [--dsn=<dsn>]
               [--config=<file>] [--output=<file>] [--dry-run]
 
-{Database::USAGE}
+{$connection}
 
 Other options:
   --config    the configuration file of the project, which returns a Configuration object:

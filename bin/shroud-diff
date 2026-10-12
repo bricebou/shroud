@@ -21,6 +21,7 @@ foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php
     }
 }
 
+$connection = Database::USAGE;
 $usage = <<<TXT
 Compares the base of a site to its declaration, both ways, and suggests the declaration of
 what the base carries in addition: the diff of the site against the bare platform, ready to classify.
@@ -30,7 +31,7 @@ Usage:
               [--user=<user>] [--password=<password>] [--dsn=<dsn>]
               [--config=<file>] [--write[=<file.php>]]
 
-{Database::USAGE}
+{$connection}
 
 Other options:
   --config    the configuration file of the project, which returns a Configuration object;

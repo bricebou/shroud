@@ -18,6 +18,7 @@ foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php
     }
 }
 
+$connection = Database::USAGE;
 $usage = <<<TXT
 Freezes the schema of a bare platform, tables, primary keys and typed columns, into the frozen
 schemas of the platform package: the baseline that shroud-diff compares a site against.
@@ -27,7 +28,7 @@ Usage:
                   [--user=<user>] [--password=<password>] [--dsn=<dsn>]
                   [--config=<file>] [--version=<x.y.z>] [--force]
 
-{Database::USAGE}
+{$connection}
 
 Other options:
   --config    the configuration file of the project, which names the platform;
