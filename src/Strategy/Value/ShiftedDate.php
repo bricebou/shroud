@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Value;
 
 use Shroud\Context;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Identity\Reference;
 use Shroud\Strategy\AbstractTextStrategy;
 
@@ -18,6 +19,10 @@ final class ShiftedDate extends AbstractTextStrategy
     public function __construct(
         private readonly int $maxDays = 365,
     ) {
+        // Below one day, Faker swaps the bounds of its draw and a date could keep its value.
+        if ($maxDays < 1) {
+            throw new InvalidConfigurationException(sprintf('the shift of a date must reach at least one day, %d given', $maxDays));
+        }
     }
 
     protected function transform(string $value, Context $context): string

@@ -201,4 +201,12 @@ final class ValueStrategiesTest extends StrategyTestCase
 
         self::apply(new ShapedText(), "caf\xE9");
     }
+
+    public function testShiftedDateRefusesAShiftBelowOneDay(): void
+    {
+        $this->expectException(\Shroud\Exception\InvalidConfigurationException::class);
+        $this->expectExceptionMessage('at least one day, 0 given');
+
+        new ShiftedDate(maxDays: 0);
+    }
 }
