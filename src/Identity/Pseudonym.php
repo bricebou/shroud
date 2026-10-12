@@ -14,6 +14,7 @@ use Shroud\Text\Words;
  * The first names and the last names are reserves: a word-by-word replacement consumes
  * as many as the original counts, in order.
  * The first of each list is the first name, the last name, of the object.
+ * The gender, drawn, never observed, gives the first names and the civility.
  */
 final readonly class Pseudonym
 {
@@ -27,6 +28,7 @@ final readonly class Pseudonym
      * @param list<string> $organizationWords
      */
     private function __construct(
+        public Gender $gender,
         public array $firstNames,
         public array $lastNames,
         public array $organizationWords,
@@ -43,15 +45,16 @@ final readonly class Pseudonym
      * Draws a complete pseudonym from a seeded Faker; the suffix, specific to the object, makes its email unique.
      *
      * The order of the draws is part of the contract: changing it changes every fixture.
-     * A new field is drawn last.
+     * A new field is drawn last; the gender comes first, for the first names follow it.
      */
     public static function draw(Faker $faker, string $suffix): self
     {
+        $gender = $faker->boolean() ? Gender::Female : Gender::Male;
         $firstNames = [];
         $lastNames = [];
         // A name with a space ("Da Costa") would replace one word by two: draw again.
         for ($i = 0; $i < 5; ++$i) {
-            $firstNames[] = self::drawWord($faker->firstName(...));
+            $firstNames[] = self::drawWord(static fn (): string => $faker->firstName($gender->value));
             $lastNames[] = self::drawWord($faker->lastName(...));
         }
         // The words of the company name, then fillers for longer organization names.
@@ -68,6 +71,7 @@ final readonly class Pseudonym
         $email = $handle . '@' . $faker->safeEmailDomain();
 
         return new self(
+            gender: $gender,
             firstNames: $firstNames,
             lastNames: $lastNames,
             organizationWords: $organizationWords,
@@ -88,6 +92,7 @@ final readonly class Pseudonym
     public function pack(): string
     {
         return implode(self::FIELD_SEPARATOR, [
+            $this->gender->value,
             implode(self::ITEM_SEPARATOR, $this->firstNames),
             implode(self::ITEM_SEPARATOR, $this->lastNames),
             implode(self::ITEM_SEPARATOR, $this->organizationWords),
@@ -105,9 +110,10 @@ final readonly class Pseudonym
      */
     public static function unpack(string $packed): self
     {
-        [$firstNames, $lastNames, $organizationWords, $domain, $handle, $email, $street, $postalCode, $city] = explode(self::FIELD_SEPARATOR, $packed);
+        [$gender, $firstNames, $lastNames, $organizationWords, $domain, $handle, $email, $street, $postalCode, $city] = explode(self::FIELD_SEPARATOR, $packed);
 
         return new self(
+            gender: Gender::from($gender),
             firstNames: explode(self::ITEM_SEPARATOR, $firstNames),
             lastNames: explode(self::ITEM_SEPARATOR, $lastNames),
             organizationWords: explode(self::ITEM_SEPARATOR, $organizationWords),

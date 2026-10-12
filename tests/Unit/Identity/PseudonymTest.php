@@ -6,7 +6,9 @@ namespace Shroud\Tests\Unit\Identity;
 
 use Faker\Factory;
 use Faker\Generator as Faker;
+use Faker\Provider\en_US\Person as FakerPerson;
 use PHPUnit\Framework\TestCase;
+use Shroud\Identity\Gender;
 use Shroud\Identity\Pseudonym;
 
 final class PseudonymTest extends TestCase
@@ -30,6 +32,22 @@ final class PseudonymTest extends TestCase
         self::assertSame($pseudonym->lastNames, $pseudonym->listFullNameWords(-1));
         self::assertSame([$pseudonym->firstNames[0], ...$pseudonym->lastNames], $pseudonym->listFullNameWords());
         self::assertSame([...array_slice($pseudonym->firstNames, 0, 2), ...$pseudonym->lastNames], $pseudonym->listFullNameWords(2));
+    }
+
+    public function testTheFirstNamesFollowTheDrawnGender(): void
+    {
+        $genders = [];
+        for ($seed = 1; $seed <= 20; ++$seed) {
+            $pseudonym = Pseudonym::draw($this->faker($seed), 'x' . $seed);
+            $names = new \ReflectionProperty(FakerPerson::class, $pseudonym->gender === Gender::Female ? 'firstNameFemale' : 'firstNameMale')->getValue();
+            self::assertIsArray($names);
+            foreach ($pseudonym->firstNames as $firstName) {
+                self::assertContains($firstName, $names, "seed {$seed}");
+            }
+            $genders[$pseudonym->gender->value] = true;
+        }
+
+        self::assertCount(2, $genders, 'both genders are drawn');
     }
 
     public function testTheEmailJoinsTheFirstNamesTheSuffixAndASafeDomain(): void
