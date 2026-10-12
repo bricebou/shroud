@@ -20,7 +20,7 @@ final class GeneratorTest extends TestCase
         $generator = new Generator(self::SALT);
         $pseudonym = $generator->pseudonymFor(new Reference('author', 4242));
 
-        self::assertSame($pseudonym, $generator->pseudonymFor(new Reference('author', '4242')), 'drawn once, kept');
+        self::assertEquals($pseudonym, $generator->pseudonymFor(new Reference('author', '4242')), 'drawn once, kept');
         self::assertEquals($pseudonym, new Generator(self::SALT)->pseudonymFor(new Reference('author', 4242)), 'same across runs');
         self::assertNotEquals($pseudonym->email, new Generator('another salt')->pseudonymFor(new Reference('author', 4242))->email);
         self::assertNotEquals($pseudonym->email, $generator->pseudonymFor(new Reference('contact', 4242))->email);

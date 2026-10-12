@@ -23,9 +23,9 @@ final class Generator
     private readonly Faker $faker;
 
     /**
-     * The pseudonyms drawn so far, by reference key.
+     * The pseudonyms drawn so far, packed, by reference key.
      *
-     * @var array<string, Pseudonym>
+     * @var array<string, string>
      */
     private array $pseudonyms = [];
 
@@ -159,11 +159,11 @@ final class Generator
      */
     public function pseudonymFor(Reference $reference): Pseudonym
     {
-        return $this->pseudonyms[$reference->toKey()]
+        return Pseudonym::unpack($this->pseudonyms[$reference->toKey()]
             ??= Pseudonym::draw(
                 $this->seedFaker('pseudonym', $reference->type, $reference->id),
                 $this->pseudonymSuffix($reference),
-            );
+            )->pack());
     }
 
     /**

@@ -18,7 +18,7 @@ final class ContextTest extends TestCase
     {
         $generator = new Generator('test salt');
 
-        self::assertSame(
+        self::assertEquals(
             $generator->pseudonymFor(new Reference('person', 42)),
             $this->context($generator, new Reference('person', 42))->requirePseudonym(),
         );

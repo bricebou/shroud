@@ -53,9 +53,20 @@ final class PseudonymTest extends TestCase
         self::assertNotSame('', $pseudonym->city);
     }
 
-    private function faker(int $seed): Faker
+    public function testUnpackingGivesBackThePackedPseudonym(): void
     {
-        $faker = Factory::create('en_US');
+        foreach (['en_US', 'fr_FR', 'de_DE', 'ja_JP'] as $locale) {
+            for ($seed = 1; $seed <= 50; ++$seed) {
+                $pseudonym = Pseudonym::draw($this->faker($seed, $locale), 'x' . $seed);
+
+                self::assertEquals($pseudonym, Pseudonym::unpack($pseudonym->pack()), "{$locale}, seed {$seed}");
+            }
+        }
+    }
+
+    private function faker(int $seed, string $locale = 'en_US'): Faker
+    {
+        $faker = Factory::create($locale);
         $faker->seed($seed);
 
         return $faker;
