@@ -16,8 +16,10 @@ use Shroud\Exception\TruncatedTableException;
 use Shroud\Exception\UndeclaredColumnException;
 use Shroud\Generator;
 use Shroud\Strategy\Pseudonym\Email;
+use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Keep;
 use Shroud\Strategy\Value\ShapedDigits;
+use Shroud\Strategy\Wrapper\Fallback;
 use Shroud\Tests\Unit\Fixture;
 
 final class DryRunTest extends TestCase
@@ -103,7 +105,7 @@ final class DryRunTest extends TestCase
             'newsletters: undeclared table',
             'contacts.phone: letters found (2 rows)',
             'contacts.email: The strategy of contacts.email needs an object reference, but the row carries none (1 row)',
-            'Dry run: 3 rows in 1 tables, 3 refusals in 2 columns, 1 undeclared table.',
+            'Dry run: 3 rows in 1 table, 3 refusals in 2 columns, 1 undeclared table.',
         ], $dryRun->report());
     }
 
@@ -116,6 +118,9 @@ final class DryRunTest extends TestCase
 
         self::assertTrue($dryRun->isClean());
         self::assertSame(['Dry run: 3 rows in 2 tables, every one passes.'], $dryRun->report());
+
+        $dryRun->noteTable('empty');
+        self::assertSame('Dry run: 3 rows in 3 tables, every one passes.', $dryRun->summary(), 'an empty declared table counts');
     }
 
     private function disguiser(): Disguiser
@@ -129,5 +134,36 @@ final class DryRunTest extends TestCase
             ], ReferenceColumns::fromFixedType('person', 'id_person')),
             Table::truncated('visits'),
         ]), new Generator(Fixture::SALT));
+    }
+
+    public function testTheValuesTakenOverByAFallbackAreCounted(): void
+    {
+        $dryRun = new DryRun();
+        $disguiser = new Disguiser(new Declaration([
+            new Table('contacts', 'id', [
+                'id' => new Keep(),
+                'phone' => new Fallback(new ShapedDigits(), new Clear()),
+            ]),
+        ]), new Generator(Fixture::SALT));
+        foreach (['06 12', 'call me', 'never'] as $id => $phone) {
+            $dryRun->countRow('contacts');
+            self::assertSame([], $disguiser->checkRow('contacts', [
+                'id' => (string) $id,
+                'phone' => $phone,
+            ], $dryRun));
+        }
+
+        self::assertTrue($dryRun->isClean(), 'a value taken over is no refusal');
+        self::assertSame([
+            'contacts' => [
+                'phone' => [
+                    'letters found' => 2,
+                ],
+            ],
+        ], $dryRun->fallbacks());
+        self::assertSame([
+            'contacts.phone: letters found (2 values taken over by the fallback)',
+            'Dry run: 3 rows in 1 table, every one passes, 2 values taken over by a fallback.',
+        ], $dryRun->report());
     }
 }

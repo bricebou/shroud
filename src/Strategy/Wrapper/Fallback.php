@@ -29,7 +29,9 @@ final readonly class Fallback implements RelayingObserverInterface
     {
         try {
             return $this->strategy->apply($value, $context);
-        } catch (InvalidValueException) {
+        } catch (InvalidValueException $refusal) {
+            $context->fallbackListener?->fellBack($context, $refusal);
+
             return $this->fallback->apply($value, $context);
         }
     }

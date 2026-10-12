@@ -8,6 +8,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Exception\ShroudException;
 use Shroud\Exception\TruncatedTableException;
 use Shroud\Strategy\Observation;
+use Shroud\Strategy\Wrapper\FallbackListenerInterface;
 
 /**
  * Transforms rows: rows come in, disguised rows come out.
@@ -59,10 +60,11 @@ final readonly class Disguiser
      * malformed data that only a full pass finds. An undeclared or truncated table still refuses.
      *
      * @param array<string, mixed> $row
+     * @param ?FallbackListenerInterface $listener hears the values a fallback takes over
      *
      * @return array<string, ShroudException> empty when every column passes
      */
-    public function checkRow(string $tableName, array $row): array
+    public function checkRow(string $tableName, array $row, ?FallbackListenerInterface $listener = null): array
     {
         $table = $this->declaration->getTable($tableName);
         if ($table->truncated) {
@@ -74,7 +76,7 @@ final readonly class Disguiser
         $refusals = [];
         foreach ($row as $column => $value) {
             try {
-                $context = new Context($table->name, $column, $key, $row, $reference, $this->generator, $this->declaration);
+                $context = new Context($table->name, $column, $key, $row, $reference, $this->generator, $this->declaration, $listener);
                 $table->getStrategyFor($column)->apply($value, $context);
             } catch (ShroudException $exception) {
                 $refusals[$column] = $exception;

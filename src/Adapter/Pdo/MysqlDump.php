@@ -73,9 +73,10 @@ final readonly class MysqlDump
             if ($table->truncated) {
                 continue;
             }
+            $dryRun->noteTable($table->name);
             foreach ($this->rows($table) as $row) {
                 $dryRun->countRow($table->name);
-                foreach ($this->disguiser->checkRow($table->name, $row) as $column => $refusal) {
+                foreach ($this->disguiser->checkRow($table->name, $row, $dryRun) as $column => $refusal) {
                     $dryRun->noteRefusal($table->name, $column, $refusal);
                 }
             }

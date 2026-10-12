@@ -70,13 +70,15 @@ Console::run(static function () use ($options, $usage): int {
     $pdo = Console::connect($options, $configuration, $directory, $usage);
     $dump = new MysqlDump($pdo, $configuration->declaration, $configuration->disguiser());
     $started = microtime(as_float: true);
-    $progress = static function (string $table, int $rows): void {
-        fwrite(STDERR, sprintf("%-32s %8d row%s\n", $table, $rows, $rows === 1 ? '' : 's'));
+    $width = max(32, ...array_map(static fn (Shroud\Declaration\Table $table): int => strlen($table->name), $configuration->declaration->tables()));
+    $progress = static function (string $table, int $rows) use ($width): void {
+        fwrite(STDERR, sprintf("%-{$width}s %9d row%s\n", $table, $rows, $rows === 1 ? '' : 's'));
     };
+    $done = static fn (): string => sprintf('Done in %.1f s, peak memory %.1f MiB', microtime(as_float: true) - $started, memory_get_peak_usage(real_usage: true) / 1048576);
 
     if (array_key_exists('dry-run', $options)) {
         $dryRun = $dump->dryRun($progress);
-        fwrite(STDERR, sprintf("Done in %.1f s\n\n", microtime(as_float: true) - $started));
+        fwrite(STDERR, $done() . "\n\n");
         fwrite(STDOUT, implode("\n", $dryRun->report()) . "\n");
 
         return $dryRun->isClean() ? 0 : 1;
@@ -88,7 +90,7 @@ Console::run(static function () use ($options, $usage): int {
         Console::fail('Cannot open the output file ' . $file);
     }
     $dump->write($output, $progress);
-    fwrite(STDERR, sprintf("Done in %.1f s\n", microtime(as_float: true) - $started));
+    fwrite(STDERR, $done() . "\n");
 
     return 0;
 });

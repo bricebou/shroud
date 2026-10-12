@@ -9,6 +9,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Identity\Pseudonym;
 use Shroud\Identity\Reference;
+use Shroud\Strategy\Wrapper\FallbackListenerInterface;
 
 /**
  * Carries what a strategy knows about the value it transforms: its table, its column, its row,
@@ -21,6 +22,7 @@ final readonly class Context
      * @param array<string, mixed> $row the whole row, as read
      * @param ?Reference $reference the object the row references, or null when it references none
      * @param Declaration $declaration the declaration of the base, empty when a strategy runs alone
+     * @param ?FallbackListenerInterface $fallbackListener hears the values a fallback takes over, during a dry run
      */
     public function __construct(
         public string $table,
@@ -30,6 +32,7 @@ final readonly class Context
         public ?Reference $reference,
         public Generator $generator,
         public Declaration $declaration = new Declaration([]),
+        public ?FallbackListenerInterface $fallbackListener = null,
     ) {
     }
 

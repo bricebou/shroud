@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Shroud\Adapter;
 
+use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Exception\ShroudException;
+use Shroud\Strategy\Wrapper\FallbackListenerInterface;
 
 /**
- * Tallies what a dry run over a base finds: the rows read, and the refusals by table, column and reason.
+ * Tallies what a dry run over a base finds: the tables and rows read, the refusals by table, column
+ * and reason, and the values that a `Fallback` took over.
  *
  * A sample of a few rows per table does not find the malformed data of an old base; only the
- * full pass does, and it must not stop at the first refusal.
+ * full pass does, and it must not stop at the first refusal. A value taken over by a fallback is
+ * no refusal, but the count tells how much of a column the declaration did not foresee.
  */
-final class DryRun
+final class DryRun implements FallbackListenerInterface
 {
     /**
      * @var array<string, int>
@@ -29,6 +33,37 @@ final class DryRun
      * @var list<string>
      */
     private array $undeclaredTables = [];
+
+    /**
+     * @var array<string, array<string, array<string, int>>>
+     */
+    private array $fallbacks = [];
+
+    /**
+     * Notes a declared table read, even an empty one.
+     */
+    public function noteTable(string $table): void
+    {
+        $this->rows[$table] ??= 0;
+    }
+
+    /**
+     * Notes that a fallback took over a value, under the reason of the refusal.
+     */
+    public function fellBack(Context $context, InvalidValueException $refusal): void
+    {
+        $this->fallbacks[$context->table][$context->column][$refusal->reason] = ($this->fallbacks[$context->table][$context->column][$refusal->reason] ?? 0) + 1;
+    }
+
+    /**
+     * Returns the values taken over by a fallback, by table, column and reason.
+     *
+     * @return array<string, array<string, array<string, int>>>
+     */
+    public function fallbacks(): array
+    {
+        return $this->fallbacks;
+    }
 
     /**
      * Counts a row read in a table.
@@ -82,7 +117,7 @@ final class DryRun
     }
 
     /**
-     * Returns the report, one line per table, column and reason, then a summary.
+     * Returns the report: the undeclared tables, the refusals, then the values a fallback took over, and a summary.
      *
      * @return list<string>
      */
@@ -95,7 +130,14 @@ final class DryRun
         foreach ($this->refusals as $table => $columns) {
             foreach ($columns as $column => $reasons) {
                 foreach ($reasons as $reason => $count) {
-                    $lines[] = sprintf('%s.%s: %s (%d row%s)', $table, $column, $reason, $count, $count > 1 ? 's' : '');
+                    $lines[] = sprintf('%s.%s: %s (%s)', $table, $column, $reason, $this->plural($count, 'row'));
+                }
+            }
+        }
+        foreach ($this->fallbacks as $table => $columns) {
+            foreach ($columns as $column => $reasons) {
+                foreach ($reasons as $reason => $count) {
+                    $lines[] = sprintf('%s.%s: %s (%s taken over by the fallback)', $table, $column, $reason, $this->plural($count, 'value'));
                 }
             }
         }
@@ -109,25 +151,41 @@ final class DryRun
      */
     public function summary(): string
     {
-        $refused = 0;
-        foreach ($this->refusals as $columns) {
-            foreach ($columns as $reasons) {
-                $refused += array_sum($reasons);
-            }
-        }
+        $parts = [sprintf('Dry run: %s in %s', $this->plural($this->rows(), 'row'), $this->plural(count($this->rows), 'table'))];
         if ($this->isClean()) {
-            return sprintf('Dry run: %d rows in %d tables, every one passes.', $this->rows(), count($this->rows));
+            $parts[] = 'every one passes';
+        } else {
+            $parts[] = sprintf('%s in %s', $this->plural($this->total($this->refusals), 'refusal'), $this->plural(array_sum(array_map(count(...), $this->refusals)), 'column'));
+        }
+        if ($this->undeclaredTables !== []) {
+            $parts[] = $this->plural(count($this->undeclaredTables), 'undeclared table');
+        }
+        if ($this->fallbacks !== []) {
+            $parts[] = sprintf('%s taken over by a fallback', $this->plural($this->total($this->fallbacks), 'value'));
         }
 
-        return sprintf(
-            'Dry run: %d rows in %d tables, %d refusal%s in %d column%s%s.',
-            $this->rows(),
-            count($this->rows),
-            $refused,
-            $refused > 1 ? 's' : '',
-            $columns = array_sum(array_map(count(...), $this->refusals)),
-            $columns > 1 ? 's' : '',
-            $this->undeclaredTables === [] ? '' : sprintf(', %d undeclared table%s', count($this->undeclaredTables), count($this->undeclaredTables) > 1 ? 's' : ''),
-        );
+        return implode(', ', $parts) . '.';
+    }
+
+    /**
+     * Sums the counts of a tally by table, column and reason.
+     *
+     * @param array<string, array<string, array<string, int>>> $tally
+     */
+    private function total(array $tally): int
+    {
+        $total = 0;
+        foreach ($tally as $columns) {
+            foreach ($columns as $reasons) {
+                $total += array_sum($reasons);
+            }
+        }
+
+        return $total;
+    }
+
+    private function plural(int $count, string $noun): string
+    {
+        return sprintf('%d %s%s', $count, $noun, $count === 1 ? '' : 's');
     }
 }
