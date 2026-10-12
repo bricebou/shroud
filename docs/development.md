@@ -58,7 +58,9 @@ check` on PHP 8.4 and 8.5.
 
 ## Writing a platform package
 
-A platform package implements `Shroud\Platform\PlatformInterface` and depends on the core:
+A platform package implements `Shroud\Platform\PlatformInterface`, best by extending
+`Shroud\Platform\AbstractPlatform`, which answers every question neutrally, so that the package
+writes only what it knows and keeps working when the contract grows. It depends on the core:
 
 - `name()`, in lowercase, for the messages and the file names;
 - `preservedMarkup()`, the regular expression fragments of the markup of its texts to leave

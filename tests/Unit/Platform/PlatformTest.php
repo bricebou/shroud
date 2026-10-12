@@ -10,6 +10,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
 use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Generator;
+use Shroud\Platform\AbstractPlatform;
 use Shroud\Platform\Generic;
 use Shroud\Schema\Glossary\English;
 use Shroud\Strategy\Reference\RenumberedId;
@@ -54,5 +55,26 @@ final class PlatformTest extends TestCase
 
         self::assertSame("See #person:{$person}, #article:12 and {{name}}", new TestPlatform()->renumberReferences('See #person:12, #article:12 and {{name}}', $context));
         self::assertSame('See #person:12', new TestPlatform()->renumberReferences('See #person:12', new Context('people', 'bio', '42', [], reference: null, generator: $generator)), 'nothing is renumbered in an empty declaration');
+    }
+
+    public function testAPlatformBuiltOnTheAbstractOneAnswersWhatItDoesNotKnowNeutrally(): void
+    {
+        $blog = new readonly class() extends AbstractPlatform {
+            public function name(): string
+            {
+                return 'blog';
+            }
+        };
+
+        self::assertSame([], $blog->preservedMarkup());
+        self::assertSame([], $blog->bareDeclaration()->tables());
+        self::assertSame([], $blog->frozenSchemas()->versions());
+        self::assertNull($blog->connectionFile());
+        self::assertSame([], $blog->draftRules());
+        self::assertCount(1, $blog->glossaries());
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('the blog platform has no connection file');
+        $blog->readConnection('config/database.ini');
     }
 }
