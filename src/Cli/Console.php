@@ -66,7 +66,7 @@ final class Console
     }
 
     /**
-     * Runs the body of a command, turning a refusal of the library into an error message and the exit code 2.
+     * Runs the body of a command, turning a refusal of the library or of the base into an error message and the exit code 2.
      *
      * @param callable(): int $body returns the exit code
      */
@@ -76,6 +76,8 @@ final class Console
             exit($body());
         } catch (ShroudException $exception) {
             self::fail($exception->getMessage());
+        } catch (\PDOException $exception) {
+            self::fail('Database error: ' . $exception->getMessage());
         }
     }
 

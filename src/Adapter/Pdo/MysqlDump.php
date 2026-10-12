@@ -197,6 +197,10 @@ final readonly class MysqlDump
     {
         $statement = $this->pdo->query('SHOW CREATE TABLE ' . $this->quoteIdentifier($table));
         $row = $statement === false ? false : $statement->fetch(\PDO::FETCH_NUM);
+        // The connection streams its results: a cursor left open blocks the next query.
+        if ($statement !== false) {
+            $statement->closeCursor();
+        }
         if ($row === false || ! isset($row[1]) || ! is_string($row[1])) {
             throw new InvalidSchemaException('cannot read the schema of ' . $table);
         }

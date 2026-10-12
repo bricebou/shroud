@@ -77,6 +77,10 @@ Console::run(static function () use ($options, $usage): int {
 
     $statement = $pdo->query('SELECT DATABASE()');
     $name = $statement === false ? '?' : (string) $statement->fetchColumn();
+    // The connection streams its results: a cursor left open blocks the next query.
+    if ($statement !== false) {
+        $statement->closeCursor();
+    }
     $schema = new SchemaReader($pdo)->read();
     $version = $platform->readVersion($pdo);
     $declaration = $configuration->declaration;
