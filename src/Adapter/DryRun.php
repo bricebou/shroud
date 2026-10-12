@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shroud;
+namespace Shroud\Adapter;
 
 use Shroud\Exception\InvalidValueException;
 use Shroud\Exception\ShroudException;

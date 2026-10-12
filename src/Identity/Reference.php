@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shroud;
+namespace Shroud\Identity;
 
 /**
  * Designates one object of the base, the author 4242 for instance: a type and an id.

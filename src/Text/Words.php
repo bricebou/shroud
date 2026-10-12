@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shroud;
+namespace Shroud\Text;
 
 use Faker\Generator as Faker;
 

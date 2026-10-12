@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\Pseudonym\City;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\Login;

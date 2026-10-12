@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Shroud\Tests\Unit;
+namespace Shroud\Tests\Unit\Identity;
 
 use PHPUnit\Framework\TestCase;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 
 final class ReferenceTest extends TestCase
 {

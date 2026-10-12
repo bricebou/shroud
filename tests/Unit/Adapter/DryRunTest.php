@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Shroud\Tests\Unit;
+namespace Shroud\Tests\Unit\Adapter;
 
 use PHPUnit\Framework\TestCase;
+use Shroud\Adapter\DryRun;
 use Shroud\Declaration\Declaration;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Declaration\Table;
 use Shroud\Disguiser;
-use Shroud\DryRun;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Exception\TruncatedTableException;
@@ -18,6 +18,7 @@ use Shroud\Generator;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Value\Keep;
 use Shroud\Strategy\Value\ShapedDigits;
+use Shroud\Tests\Unit\Fixture;
 
 final class DryRunTest extends TestCase
 {

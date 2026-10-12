@@ -7,6 +7,8 @@ namespace Shroud;
 use Faker\Generator as Faker;
 use Shroud\Declaration\Declaration;
 use Shroud\Exception\MissingReferenceException;
+use Shroud\Identity\Pseudonym;
+use Shroud\Identity\Reference;
 
 /**
  * Carries what a strategy knows about the value it transforms: its table, its column, its row,

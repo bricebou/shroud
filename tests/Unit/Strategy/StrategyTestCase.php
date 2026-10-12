@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Shroud\Context;
 use Shroud\Declaration\Declaration;
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\StrategyInterface;
 
 /**

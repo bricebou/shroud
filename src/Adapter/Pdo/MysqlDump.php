@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shroud\Adapter\Pdo;
 
+use Shroud\Adapter\DryRun;
 use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
 use Shroud\Disguiser;
-use Shroud\DryRun;
 use Shroud\Exception\InvalidSchemaException;
 use Shroud\Exception\UndeclaredTableException;
 

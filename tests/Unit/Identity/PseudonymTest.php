@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Shroud\Tests\Unit;
+namespace Shroud\Tests\Unit\Identity;
 
 use Faker\Factory;
 use Faker\Generator as Faker;
 use PHPUnit\Framework\TestCase;
-use Shroud\Pseudonym;
+use Shroud\Identity\Pseudonym;
 
 final class PseudonymTest extends TestCase
 {

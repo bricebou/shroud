@@ -6,7 +6,7 @@ namespace Shroud\Strategy;
 
 use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
-use Shroud\Words;
+use Shroud\Text\Words;
 
 /**
  * Replaces the words of a value, rank by rank, by a list of fake words; beyond the list, by

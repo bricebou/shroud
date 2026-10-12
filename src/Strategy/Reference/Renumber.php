@@ -6,7 +6,7 @@ namespace Shroud\Strategy\Reference;
 
 use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
-use Shroud\Permutation;
+use Shroud\Identity\Permutation;
 
 /**
  * Permutes an id for its object type, keeping the type of the value: what the reference strategies share.

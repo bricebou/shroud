@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Shroud\Declaration;
 
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 
 /**
  * Tells where a row carries the reference to its object: an id column, and a type either fixed

@@ -6,10 +6,10 @@ namespace Shroud\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Shroud\Generator;
+use Shroud\Identity\Permutation;
+use Shroud\Identity\Reference;
 use Shroud\Language\French;
 use Shroud\Language\Plain;
-use Shroud\Permutation;
-use Shroud\Reference;
 
 final class GeneratorTest extends TestCase
 {

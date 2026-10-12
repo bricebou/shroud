@@ -8,7 +8,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;

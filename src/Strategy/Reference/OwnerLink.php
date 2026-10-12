@@ -6,7 +6,7 @@ namespace Shroud\Strategy\Reference;
 
 use Shroud\Context;
 use Shroud\Declaration\ReferenceColumns;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\ObserverInterface;
 use Shroud\Strategy\StrategyInterface;

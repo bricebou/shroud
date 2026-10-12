@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Shroud\Tests\Unit;
+namespace Shroud\Tests\Unit\Identity;
 
 use PHPUnit\Framework\TestCase;
-use Shroud\Permutation;
+use Shroud\Identity\Permutation;
 
 final class PermutationTest extends TestCase
 {

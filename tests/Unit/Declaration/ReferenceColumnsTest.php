@@ -7,7 +7,7 @@ namespace Shroud\Tests\Unit\Declaration;
 use PHPUnit\Framework\TestCase;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 
 final class ReferenceColumnsTest extends TestCase
 {

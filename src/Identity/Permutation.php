@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shroud;
+namespace Shroud\Identity;
 
 /**
  * Permutes positive ids reversibly under a key, through a Feistel network.

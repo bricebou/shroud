@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Shroud\Tests\Unit;
+namespace Shroud\Tests\Unit\Text;
 
 use Faker\Factory;
 use PHPUnit\Framework\TestCase;
-use Shroud\Words;
+use Shroud\Text\Words;
 
 final class WordsTest extends TestCase
 {

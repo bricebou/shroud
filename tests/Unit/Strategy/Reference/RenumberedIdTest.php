@@ -6,7 +6,7 @@ namespace Shroud\Tests\Unit\Strategy\Reference;
 
 use Shroud\Exception\InvalidValueException;
 use Shroud\Generator;
-use Shroud\Permutation;
+use Shroud\Identity\Permutation;
 use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Wrapper\Fallback;

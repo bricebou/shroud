@@ -6,10 +6,14 @@ namespace Shroud;
 
 use Faker\Factory;
 use Faker\Generator as Faker;
+use Shroud\Identity\Permutation;
+use Shroud\Identity\Pseudonym;
+use Shroud\Identity\Reference;
 use Shroud\Language\LanguageInterface;
 use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
 use Shroud\Platform\PlatformInterface;
+use Shroud\Text\Text;
 
 /**
  * Derives every random-looking draw from the salt alone, so that two runs give the same result.

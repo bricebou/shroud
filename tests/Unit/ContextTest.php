@@ -10,7 +10,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 
 final class ContextTest extends TestCase
 {

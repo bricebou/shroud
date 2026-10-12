@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shroud\Tests\Unit;
+namespace Shroud\Tests\Unit\Text;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -11,7 +11,7 @@ use Shroud\Language\French;
 use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
 use Shroud\Tests\Unit\Platform\TestPlatform;
-use Shroud\Text;
+use Shroud\Text\Text;
 
 final class TextTest extends TestCase
 {

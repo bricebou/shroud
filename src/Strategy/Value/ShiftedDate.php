@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Value;
 
 use Shroud\Context;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\AbstractTextStrategy;
 
 /**

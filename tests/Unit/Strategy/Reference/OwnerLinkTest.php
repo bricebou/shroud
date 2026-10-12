@@ -6,7 +6,7 @@ namespace Shroud\Tests\Unit\Strategy\Reference;
 
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Generator;
-use Shroud\Reference;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\Reference\OwnerLink;
 use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Keep;

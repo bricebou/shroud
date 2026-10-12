@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Shroud;
+namespace Shroud\Identity;
 
 use Faker\Generator as Faker;
+use Shroud\Text\Words;
 
 /**
  * Holds the complete fake identity of one object, the author 4242 for instance, not of a type.

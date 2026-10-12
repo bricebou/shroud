@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Shroud\Tests\Unit\Strategy\Pseudonym;
 
 use Shroud\Generator;
+use Shroud\Identity\Reference;
 use Shroud\Language\French;
-use Shroud\Reference;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
 use Shroud\Strategy\Pseudonym\LastName;
