@@ -11,7 +11,12 @@ use Shroud\Adapter\Pdo\SchemaReader;
 use Shroud\Cli\Console;
 use Shroud\Cli\Database;
 
-foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $autoload) {
+// The autoloader of the project that installed the command first, so that its own classes load too.
+$autoloads = [__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'];
+if (is_string($GLOBALS['_composer_autoload_path'] ?? null)) {
+    array_unshift($autoloads, $GLOBALS['_composer_autoload_path']);
+}
+foreach ($autoloads as $autoload) {
     if (is_file($autoload)) {
         require $autoload;
         break;
