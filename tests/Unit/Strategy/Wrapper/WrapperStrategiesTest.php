@@ -95,4 +95,15 @@ final class WrapperStrategiesTest extends StrategyTestCase
             'body' => new WithoutEmails(),
         ], WithoutEmails::forColumns(['body']));
     }
+
+    public function testWithoutEmailsFindsInternationalisedAddresses(): void
+    {
+        $result = self::applyToString(new WithoutEmails(), 'Écrire à zoé@exemple-réel.test ou à 张伟@例子.测试, ou à ZOÉ@EXEMPLE-RÉEL.TEST.');
+
+        self::assertStringNotContainsString('zoé@', $result);
+        self::assertStringNotContainsString('张伟', $result);
+        preg_match_all('/[a-z0-9._-]+@example\.(?:org|com|net)/', $result, $fakes);
+        self::assertCount(3, $fakes[0]);
+        self::assertSame($fakes[0][0], $fakes[0][2], 'the case does not make two addresses');
+    }
 }

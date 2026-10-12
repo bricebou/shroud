@@ -19,7 +19,11 @@ use Shroud\Strategy\Value\Keep;
  */
 final readonly class WithoutEmails implements RelayingObserverInterface
 {
-    private const string EMAIL = '/[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/';
+    /**
+     * An address, internationalised ones included: Unicode letters in the local part and the domain.
+     * A missed address leaks, while a false positive only replaces a string that looked like one.
+     */
+    private const string EMAIL = '/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/u';
 
     public function __construct(
         private StrategyInterface $inner = new Keep(),
@@ -38,7 +42,7 @@ final readonly class WithoutEmails implements RelayingObserverInterface
 
         return preg_replace_callback(
             self::EMAIL,
-            static fn (array $match): string => $context->generator->seedFaker('email', strtolower($match[0]))->safeEmail(),
+            static fn (array $match): string => $context->generator->seedFaker('email', mb_strtolower($match[0]))->safeEmail(),
             $result,
         ) ?? $result;
     }
