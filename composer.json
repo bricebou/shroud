@@ -76,7 +76,8 @@
         ],
         "fix:cs": "ecs check --fix --ansi",
         "fix:rector": "rector process --ansi",
-        "test": "phpunit --colors --testdox"
+        "test": "phpunit --colors --testdox --testsuite unit",
+        "test:integration": "phpunit --colors --testdox --testsuite integration"
     },
     "scripts-descriptions": {
         "check": "Run every check without changing anything: syntax, coding style, Rector, static analysis, tests",
@@ -87,6 +88,7 @@
         "fix": "Apply Rector, then the coding style",
         "fix:cs": "Fix the coding style (ECS)",
         "fix:rector": "Apply the Rector rules",
-        "test": "Run the unit tests (PHPUnit)"
+        "test": "Run the unit tests (PHPUnit)",
+        "test:integration": "Run the integration tests against the MySQL or MariaDB server named by SHROUD_TEST_DSN"
     }
 }

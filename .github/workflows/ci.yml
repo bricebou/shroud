@@ -9,6 +9,16 @@ jobs:
   check:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=10
     strategy:
       fail-fast: false
       matrix:
@@ -21,3 +31,8 @@ jobs:
           coverage: none
       - uses: ramsey/composer-install@v3
       - run: composer check
+      - run: composer test:integration
+        env:
+          SHROUD_TEST_DSN: mysql:host=127.0.0.1;port=3306
+          SHROUD_TEST_USER: root
+          SHROUD_TEST_PASSWORD: root
