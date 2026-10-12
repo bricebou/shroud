@@ -41,7 +41,8 @@ grumphp:
       max_body_width: 0
       skip_on_merge_commit: true
       additional_modifiers: u
-      type_scope_conventions:
-        types: [build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test]
-        scopes: []
-        subject_pattern: '[\p{L}\p{N}]'
+      # Conventional Commits, a breaking change marked by "!" after the type or the scope.
+      matchers:
+        Conventional Commits type: '/^(?:(?:fixup|squash|amend)! )?(?:build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(?:\([^)]+\))?!?: [\p{L}\p{N}]/'
+      case_insensitive: false
+      multiline: false
