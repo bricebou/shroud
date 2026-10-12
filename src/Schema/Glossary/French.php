@@ -28,6 +28,7 @@ final class French implements GlossaryInterface
             // Personal data: an exact name is sure, an affixed name is to review.
             new DraftRule('/^(courriel|mel)$/', 'new Email()'),
             new DraftRule('/(^|_)(courriel|mel)(_|$)/', 'new Email()', review: true),
+            new DraftRule('/^(civilite|titre_civilite)$/', 'new Civility()'),
             new DraftRule('/^prenom$/', 'new FirstName()'),
             new DraftRule('/^nom_famille$/', 'new LastName()'),
             new DraftRule('/^nom_site$/', 'new ShapedText()'),
@@ -41,7 +42,6 @@ final class French implements GlossaryInterface
             new DraftRule('/(^|_)(pays|region|departement|canton)$/', 'new Keep()', review: true),
             new DraftRule('/(^|_)(societe|organisme|entreprise|cabinet|employeur|organisation|institution)(_|$)/', 'new Organization()'),
             new DraftRule('/^(fonction|poste|profession|metier)$/', 'new ShapedText()'),
-            new DraftRule('/^(civilite|titre_civilite)$/', 'new Keep()', review: true),
             new DraftRule('/^(bio|biographie|presentation|a_propos)$/', 'new ShapedText()'),
             new DraftRule('/(^|_)(tva|no_tva|numero_tva|siret|siren|no_tva_intra)(_|$)/', 'new ShapedText()'),
         ];

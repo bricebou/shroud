@@ -13,6 +13,7 @@ use Shroud\Strategy\Nested\ByColumn;
 use Shroud\Strategy\Nested\PerKey;
 use Shroud\Strategy\Nested\Serialized;
 use Shroud\Strategy\Pseudonym\City;
+use Shroud\Strategy\Pseudonym\Civility;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
@@ -55,6 +56,7 @@ final readonly class Draft
         'ShapedText' => ShapedText::class,
         'ShiftedDate' => ShiftedDate::class,
         'City' => City::class,
+        'Civility' => Civility::class,
         'Email' => Email::class,
         'FirstName' => FirstName::class,
         'FullName' => FullName::class,

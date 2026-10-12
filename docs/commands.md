@@ -236,6 +236,7 @@ then from the glossaries, then from its SQL type:
 | `status`, `lang`, `type`, `rank`, `date`, `amount`, `price`… | `Keep` |
 | `data`, `prefs`, `config`, `uuid`… | `Keep`, to review: a blob or an external id |
 | `email`, `first_name`, `last_name`, `login` | `Email`, `FirstName`, `LastName`, `Login` |
+| `civility`, `salutation`, `civilite` | `Civility` |
 | `name`, `author`, `signature`, `nom`, `from_name` | `FullName`, to review: a person or a title? |
 | `phone`, `fax`, `mobile`, `telephone` | `ShapedDigits` keeping the dialling code |
 | `address`, `postal_code`, `city`, `adresse`, `code_postal`, `ville` | `Street`, `PostalCode`, `City` |

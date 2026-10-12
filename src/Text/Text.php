@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Shroud\Text;
 
+use Shroud\Identity\Gender;
 use Shroud\Language\LanguageInterface;
 use Shroud\Platform\PlatformInterface;
 
@@ -134,6 +135,35 @@ final readonly class Text
             },
             $text,
         ) ?? $text;
+    }
+
+    /**
+     * Replaces a civility of the language by the one of the gender, in the same form and case; null for any other word.
+     */
+    public function replaceCivility(string $word, Gender $gender): ?string
+    {
+        $civility = $this->language->civility($word, $gender);
+
+        // The case is read on the letters alone: "M." is no word in capitals.
+        return $civility === null ? null : $this->shapeLike(preg_replace('/\P{L}/u', '', $word) ?? $word, $civility);
+    }
+
+    /**
+     * Sets apart the civility at the head of a name, replaced, with its blanks, from the rest.
+     *
+     * "Mme Claire Dupont" gives "M. " or "Mme ", then "Claire Dupont". Without a civility, or
+     * with a civility alone, which has to stand for the person, the head is empty.
+     *
+     * @return array{string, string}
+     */
+    public function splitCivility(string $name, Gender $gender): array
+    {
+        if (preg_match('/^(\s*)(\S+)(\s+)(?=\S)(.*)$/su', $name, $parts) !== 1) {
+            return ['', $name];
+        }
+        $civility = $this->replaceCivility($parts[2], $gender);
+
+        return $civility === null ? ['', $name] : [$parts[1] . $civility . $parts[3], $parts[4]];
     }
 
     /**

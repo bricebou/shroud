@@ -15,9 +15,19 @@ use Shroud\Strategy\AbstractShapedWords;
  * words as the full name, or a first name alone was observed, or a last name alone as many words
  * as the full name. Otherwise, an empty first name beside a full name of two words for instance,
  * the first group before a space stands for the first name, and a single group for the last name.
+ *
+ * A civility of the language at the head, "Mme", "Mr.", gives way to the one of the gender the
+ * object draws, which agrees with its first names.
  */
 final class FullName extends AbstractShapedWords
 {
+    protected function transform(string $value, Context $context): string
+    {
+        [$civility, $name] = $context->generator->text()->splitCivility($value, $context->requirePseudonym()->gender);
+
+        return $civility . parent::transform($name, $context);
+    }
+
     protected function provideWords(Context $context, string $value): array
     {
         return $context->requirePseudonym()->listFullNameWords($this->firstNameWords($context, $value));

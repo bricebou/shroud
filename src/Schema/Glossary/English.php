@@ -38,6 +38,7 @@ final class English implements GlossaryInterface
             // Personal data: an exact name is sure, an affixed name is to review.
             new DraftRule('/^(email|e_mail|mail)$/', 'new Email()'),
             new DraftRule('/(^|_)(email|e_mail|mail)(_|$)/', 'new Email()', review: true),
+            new DraftRule('/^(civility|salutation|honorific)$/', 'new Civility()'),
             new DraftRule('/^(first_?name|given_?name|forename)$/', 'new FirstName()'),
             new DraftRule('/^(last_?name|surname|family_?name)$/', 'new LastName()'),
             new DraftRule('/^(name|full_?name|display_?name|author|author_?name|contact_?name|customer_?name|sender_?name|from_?name|signature)$|(^|_)author$/', 'new FullName()', review: true),

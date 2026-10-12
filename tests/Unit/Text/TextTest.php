@@ -7,6 +7,7 @@ namespace Shroud\Tests\Unit\Text;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Shroud\Generator;
+use Shroud\Identity\Gender;
 use Shroud\Language\French;
 use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
@@ -101,6 +102,23 @@ final class TextTest extends TestCase
         self::assertSame('Alpha Beta-Gamma', $this->french()->replaceWords("زها علی\u{200C}آبادی", static fn (int $rank): string => $words[$rank]), 'the joiner of the compound becomes a hyphen');
         self::assertSame('Alpha', $this->french()->replaceWords('北京', static fn (): string => 'alpha'));
         self::assertSame('Àlpha BETA', $this->french()->replaceWords('Zoé DUPONT', static fn (int $rank): string => $words[$rank]), 'a cased script keeps its rules');
+    }
+
+    public function testACivilityTakesTheCaseOfTheOriginal(): void
+    {
+        self::assertSame('MADAME', $this->french()->replaceCivility('MONSIEUR', Gender::Female));
+        self::assertSame('monsieur', $this->french()->replaceCivility('madame', Gender::Male));
+        self::assertSame('M.', $this->french()->replaceCivility('Mme', Gender::Male));
+        self::assertNull($this->french()->replaceCivility('Dr', Gender::Male));
+    }
+
+    public function testTheCivilityOfANameIsSetApartWithItsBlanks(): void
+    {
+        self::assertSame(['M. ', 'Claire Dupont'], $this->french()->splitCivility('Mme Claire Dupont', Gender::Male));
+        self::assertSame([' Mrs.  ', 'Jane Doe '], $this->plain()->splitCivility(' Mr.  Jane Doe ', Gender::Female));
+        self::assertSame(['', 'Prof. Anna Schmidt'], $this->french()->splitCivility('Prof. Anna Schmidt', Gender::Female));
+        self::assertSame(['', 'Madame'], $this->french()->splitCivility('Madame', Gender::Male), 'a civility alone stands for the person');
+        self::assertSame(['', 'Madame '], $this->french()->splitCivility('Madame ', Gender::Male));
     }
 
     private function french(): Text

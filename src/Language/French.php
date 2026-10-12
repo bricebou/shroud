@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Shroud\Language;
 
+use Shroud\Identity\Gender;
+
 /**
  * Follows the conventions of French.
  */
@@ -50,5 +52,25 @@ final class French implements LanguageInterface
     public function elidedWords(): array
     {
         return self::ELIDED_WORDS;
+    }
+
+    public function civility(string $like, Gender $gender): ?string
+    {
+        $female = $gender === Gender::Female;
+
+        return match (mb_strtolower($like)) {
+            // The dot of "M." often goes missing, and "Mr" often stands for it.
+            'm' => $female ? 'Mme' : 'M',
+            'mr' => $female ? 'Mme' : 'Mr',
+            'mr.' => $female ? 'Mme' : 'Mr.',
+            'm.', 'mme', 'mme.', 'mlle', 'mlle.' => $female ? 'Mme' : 'M.',
+            'monsieur', 'madame', 'mademoiselle' => $female ? 'Madame' : 'Monsieur',
+            default => null,
+        };
+    }
+
+    public function defaultCivility(Gender $gender): string
+    {
+        return $gender === Gender::Female ? 'Mme' : 'M.';
     }
 }

@@ -8,6 +8,7 @@ the order they apply:
 | A word, a run of letters touching no digit | The fake word of the same rank: first name, last name, organization word or filler, according to the strategy |
 | The case of the word: `DUPONT`, `Dupont`, `dupont` | The same case on the replacement |
 | A diacritic in the word: `Müller` | A diacritic of the language on the replacement, `Bôyer` in French; none in a plain language |
+| A civility, before a full name or in its own column: `Mme`, `Mr.`, `Monsieur` | The civility of the gender of the pseudonym, which agrees with its first names, in the same language and form |
 | A code, a run of letters and digits carrying at least one digit: `3e`, `AB12`, `a84ab1130` | Each digit and each letter replaced, case kept |
 | An elision of the language before a word: `d'Aubigné`, `qu'importe` | Nothing: it disappears with its apostrophe |
 | Blanks, non-breaking spaces, punctuation, hyphens | Unchanged, in place |

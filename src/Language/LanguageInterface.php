@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Shroud\Language;
 
+use Shroud\Identity\Gender;
+
 /**
  * Gathers the conventions of a language that a shape-preserving replacement follows.
  */
@@ -26,4 +28,17 @@ interface LanguageInterface
      * @return list<string>
      */
     public function elidedWords(): array;
+
+    /**
+     * Returns the civility of the gender in the form of the one given, or null when it is no civility of the language.
+     *
+     * "Mme" or "Mlle" give "M." or "Mme", "Madame" gives "Monsieur" or "Madame": the form stays,
+     * the gender is the one drawn. The case of the original is left to the caller.
+     */
+    public function civility(string $like, Gender $gender): ?string;
+
+    /**
+     * Returns the civility the language writes for the gender, for a value that names none.
+     */
+    public function defaultCivility(Gender $gender): string;
 }

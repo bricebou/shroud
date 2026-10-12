@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Shroud\Tests\Unit\Strategy\Pseudonym;
 
 use Shroud\Generator;
+use Shroud\Identity\Gender;
 use Shroud\Identity\Reference;
 use Shroud\Language\French;
+use Shroud\Strategy\Pseudonym\Civility;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
 use Shroud\Strategy\Pseudonym\LastName;
@@ -169,5 +171,25 @@ final class WordStrategiesTest extends StrategyTestCase
 
         self::assertNull($generator->recall(new Reference('person', 42), FirstName::WORD_COUNT));
         self::assertSame(ucfirst($pseudonym->lastNames[0]) . ' ' . ucfirst($pseudonym->lastNames[1]), self::apply(new FullName(), 'Da Costa', $context));
+    }
+
+    /**
+     * The civility follows the gender of the pseudonym, as its first names do, whatever the original says.
+     */
+    public function testTheCivilityFollowsTheDrawnGender(): void
+    {
+        $french = self::context(new Generator(self::SALT, language: new French()));
+        $plain = self::context();
+        $pseudonym = $french->requirePseudonym();
+        $female = $pseudonym->gender === Gender::Female;
+        $civility = $female ? 'Mme' : 'M.';
+        $name = ucfirst($pseudonym->firstNames[0]) . ' ' . ucfirst($pseudonym->lastNames[0]);
+
+        self::assertSame($civility . ' ' . $name, self::apply(new FullName(), 'Mme Claire Dupont', $french));
+        self::assertSame($civility . ' ' . $name, self::apply(new FullName(), 'M. Jean Dupont', $french));
+        self::assertSame(($female ? 'Mrs. ' : 'Mr. ') . $name, self::apply(new FullName(), 'Mr. John Doe', $plain));
+        self::assertSame($civility, self::apply(new Civility(), 'Mlle', $french));
+        self::assertSame($civility, self::apply(new Civility(), 'Dr', $french), 'no civility: the one of the language');
+        self::assertSame($female ? 'Mrs' : 'Mr', self::apply(new Civility(), 'Dr', $plain));
     }
 }
