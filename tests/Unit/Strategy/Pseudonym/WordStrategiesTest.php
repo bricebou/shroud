@@ -119,4 +119,35 @@ final class WordStrategiesTest extends StrategyTestCase
             self::apply(new LastName(), 'Kowalczyk', self::context($generator, column: 'surname', key: '7', reference: new Reference('person', '42'))),
         );
     }
+
+    /**
+     * An empty first name beside a full name of two words: the observation does not account for the value, the first group decides.
+     */
+    public function testAnObservationThatDoesNotAccountForTheValueIsSetAside(): void
+    {
+        $generator = new Generator(self::SALT);
+        $pseudonym = $generator->pseudonymFor(new Reference('person', 42));
+        $context = self::context($generator);
+
+        new FirstName()->observe('', $context);
+        new LastName()->observe('', $context);
+
+        self::assertSame(ucfirst($pseudonym->firstNames[0]) . ' ' . ucfirst($pseudonym->lastNames[0]), self::apply(new FullName(), 'Jordy Kilback', $context));
+    }
+
+    /**
+     * No first name and a last name of one word, for a full name of one word: the person has no first name.
+     */
+    public function testAnObservationThatAccountsForTheValueIsFollowed(): void
+    {
+        $generator = new Generator(self::SALT);
+        $pseudonym = $generator->pseudonymFor(new Reference('person', 42));
+        $context = self::context($generator);
+
+        new FirstName()->observe('', $context);
+        new LastName()->observe('Dupont', $context);
+
+        self::assertSame(1, $generator->recall(new Reference('person', 42), LastName::WORD_COUNT));
+        self::assertSame(ucfirst($pseudonym->lastNames[0]), self::apply(new FullName(), 'Dupont', $context));
+    }
 }
