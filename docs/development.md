@@ -15,14 +15,17 @@ composer fix        # Rector, then the coding style
 | `check:cs` | EasyCodingStandard | no |
 | `check:rector` | Rector, dry run | no |
 | `check:static` | PHPStan, level 9 with the strict rules | no |
-| `test` | PHPUnit | no |
+| `test` | PHPUnit, the unit tests | no |
+| `test:integration` | PHPUnit, the tests against a MySQL or MariaDB server | no |
 | `fix` | Rector, then EasyCodingStandard | yes |
 | `fix:cs` | EasyCodingStandard | yes |
 | `fix:rector` | Rector | yes |
 
 The verb says whether the command changes files, the suffix names the concern. The commands of
-`bin/` go through the same checks as the source. The continuous integration runs `composer
-check` on PHP 8.4 and 8.5.
+`bin/` and the example of `docs/examples/` go through the same checks as the source. The
+integration tests need a server, named by the `SHROUD_TEST_DSN` variable, and are skipped
+without it. The continuous integration runs `composer check` and `composer test:integration`,
+against MariaDB 11.8, on PHP 8.4 and 8.5.
 
 ## Standards
 
@@ -32,13 +35,14 @@ check` on PHP 8.4 and 8.5.
 - **Rector**: the PHP 8.4 set, the floor declared in `composer.json`, with the `deadCode`,
   `codeQuality`, `namedArgs` and `earlyReturn` sets and the PHPUnit attributes. The rule that
   names the arguments of attributes is skipped: PHPUnit forbids named arguments on its own.
-- **Static analysis**: PHPStan at level 9 on `src/`, `tests/` and `bin/`, with
+- **Static analysis**: PHPStan at level 9 on `src/`, `tests/`, `bin/` and `docs/examples/`, with
   `phpstan-strict-rules` and `phpstan-phpunit`.
-- **Tests**: PHPUnit, suite `unit` in `tests/Unit/`. A test bears a name that says what it
-  checks, and its expectations are established by running, never assumed. The data of the
-  tests are made up: no value taken from a real base, anywhere in the repository. The tests
-  have their own platform, `Shroud\Tests\Unit\Platform\TestPlatform`, with two frozen schemas
-  and a connection file in `tests/fixtures/`.
+- **Tests**: PHPUnit, suite `unit` in `tests/Unit/`, suite `integration` in
+  `tests/Integration/`. A test bears a name that says what it checks, and its expectations are
+  established by running, never assumed. The data of the tests are made up: no value taken from
+  a real base, anywhere in the repository. The tests have their own platform,
+  `Shroud\Tests\Unit\Platform\TestPlatform`, with two frozen schemas and a connection file in
+  `tests/fixtures/`.
 - **PHP**: 8.4 at least, with the `intl`, `mbstring` and `pdo` extensions.
 
 ## Conventions
@@ -50,6 +54,9 @@ check` on PHP 8.4 and 8.5.
 - An abstract class bears the prefix `Abstract`, an interface the suffix `Interface`, and every
   other class is `final`. The common interface of the exceptions, `ShroudException`, is the
   one exception to the suffix.
+- The words of a language, first names by gender, last names, streets, cities, organizations,
+  live in `resources/words/`, one file per language, loaded by its `Vocabulary`. A name is a
+  single word of letters: no blank, no apostrophe, so that it replaces one word by one.
 - The strategies sort by family, according to what they need: `Value`, `Pseudonym`,
   `Reference`, `Nested`, `Wrapper`. The contract and the abstract classes stay at the root of
   `Strategy/`.

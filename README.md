@@ -38,9 +38,10 @@ demonstrations or hand-overs.
 
 The core knows no CMS. It handles arrays of rows, a declaration and a generator, and depends on
 no other library: its draws come from SHA-256, its word lists, first names, last names, streets,
-cities, from Faker, reviewed and frozen in `resources/words`. A platform package brings what belongs to a CMS: its bare declaration, its frozen
-schemas, the markup of its texts, the references it embeds in them, its connection file and its
-column vocabulary. See [Platforms](#platforms).
+cities, from Faker, reviewed and frozen in `resources/words`. A platform package brings what
+belongs to a CMS: its bare declaration, its frozen schemas, the markup of its texts, the
+references it embeds in them, its connection file and its column vocabulary. See
+[Platforms](#platforms).
 
 ## Use cases
 
@@ -131,8 +132,8 @@ composer require --dev momh/shroud
 ```
 
 The commands `shroud-dump`, `shroud-diff` and `shroud-baseline` land in `vendor/bin/`, and the
-project versions at its root a `shroud.php` file, its declaration, its salt and its platform, of
-which [`docs/examples/shroud.php`](docs/examples/shroud.php) gives the model.
+project versions at its root a `shroud.php` file, its declaration, its salt, its language and its
+platform, of which [`docs/examples/shroud.php`](docs/examples/shroud.php) gives the model.
 
 ```sh
 vendor/bin/shroud-diff --host=db --database=site --user=site   # what the declaration misses

@@ -13,7 +13,7 @@ fixtures, snapshots, logs; it says nothing about who may read the base.
 ## Three rules
 
 **One disguiser for the whole run.** The pseudonyms are deterministic and come out the same from
-any disguiser built on the same salt, but the facts observed on the objects live in the disguiser
+any disguiser built on the same salt and the same language, whatever else the process draws, but the facts observed on the objects live in the disguiser
 that observed them: the number of words of a first name, the owner of an email. Build it once,
 keep it for the run, drop it at the end.
 

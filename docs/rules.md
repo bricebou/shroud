@@ -7,7 +7,7 @@ the order they apply:
 | --- | --- |
 | A word, a run of letters touching no digit | The fake word of the same rank: first name, last name, organization word or filler, according to the strategy |
 | The case of the word: `DUPONT`, `Dupont`, `dupont` | The same case on the replacement |
-| A diacritic in the word: `Müller` | A diacritic of the language on the replacement, `Bôyer` in French; none in a plain language |
+| A diacritic in the word: `Müller` | A diacritic of the language on the replacement, `Bôyer` in French; none in English |
 | A civility, before a full name or in its own column: `Mme`, `Mr.`, `Monsieur` | The civility of the gender of the pseudonym, which agrees with its first names, in the same language and form |
 | A code, a run of letters and digits carrying at least one digit: `3e`, `AB12`, `a84ab1130` | Each digit and each letter replaced, case kept |
 | An elision of the language before a word: `d'Aubigné`, `qu'importe` | Nothing: it disappears with its apostrophe |
@@ -21,5 +21,6 @@ the order they apply:
 | A hexadecimal digest of another column | The digest of the fake value of that column, with the same algorithm |
 | An id | The number the permutation of its type gives, the same everywhere; zero and negatives stay |
 
-The language, which decides the diacritics and the elisions, and the observation pass, which
-holds first name, last name and full name together, are described in [How it works](how-it-works.md).
+The language, which holds the words of the fake identities and decides the diacritics, the
+elisions and the civilities, and the observation pass, which holds first name, last name and full
+name together, are described in [How it works](how-it-works.md).
