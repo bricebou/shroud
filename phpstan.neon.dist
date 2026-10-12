@@ -7,3 +7,4 @@ parameters:
         - bin/shroud-baseline
         - bin/shroud-diff
         - bin/shroud-dump
+        - docs/examples

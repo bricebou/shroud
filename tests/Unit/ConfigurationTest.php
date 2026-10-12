@@ -28,6 +28,39 @@ final class ConfigurationTest extends TestCase
         self::assertCount(2, $configuration->glossaries);
     }
 
+    public function testTheDocumentedExampleLoadsAndRuns(): void
+    {
+        $configuration = Configuration::fromFile(__DIR__ . '/../../docs/examples/shroud.php');
+
+        self::assertInstanceOf(Generic::class, $configuration->platform);
+        self::assertTrue($configuration->declaration->isRenumbered('person'));
+        $result = $configuration->disguiser()->disguiseTables([
+            'people' => [[
+                'id_person' => '12',
+                'name' => 'Zoé Kowalczyk',
+                'email' => 'zoe@example-real.test',
+                'password' => 'x',
+                'bio' => 'Write to zoe@example-real.test',
+                'created_at' => '2020-01-01 10:00:00',
+                'status' => 'active',
+            ]],
+            'contacts' => [[
+                'id_contact' => '5',
+                'id_person' => '12',
+                'first_name' => 'Zoé',
+                'last_name' => 'Kowalczyk',
+                'phone' => 'call me',
+            ]],
+            'visits' => [[
+                'date' => '2026-01-01',
+            ]],
+        ]);
+        self::assertSame('', $result['people'][0]['password']);
+        self::assertSame('', $result['contacts'][0]['phone']);
+        self::assertSame([], $result['visits']);
+        self::assertSame($result['people'][0]['id_person'], $result['contacts'][0]['id_person']);
+    }
+
     public function testTheGeneratorAndTheDisguiserFollowTheConfiguration(): void
     {
         $configuration = Configuration::fromFile(__DIR__ . '/../fixtures/project/shroud.php');

@@ -11,7 +11,7 @@ use PhpCsFixer\Fixer\Strict\StrictParamFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
 return ECSConfig::configure()
-    ->withPaths([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin/shroud-baseline', __DIR__ . '/bin/shroud-diff', __DIR__ . '/bin/shroud-dump'])
+    ->withPaths([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin/shroud-baseline', __DIR__ . '/bin/shroud-diff', __DIR__ . '/bin/shroud-dump', __DIR__ . '/docs/examples'])
     ->withRootFiles()
     ->withPreparedSets(psr12: true, common: true, cleanCode: true)
     // Strict rules, formerly the "strict" prepared set of ECS.
