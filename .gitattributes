@@ -3,6 +3,7 @@
 /.github export-ignore
 /.gitignore export-ignore
 /ecs.php export-ignore
+/grumphp.yaml.dist export-ignore
 /phpstan.neon.dist export-ignore
 /phpunit.xml.dist export-ignore
 /rector.php export-ignore
