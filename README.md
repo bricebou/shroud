@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="shroud-dark.svg">
+    <img src="shroud.svg" alt="" width="128" height="128">
+  </picture>
+</p>
+
 # Shroud
 
 Deterministic, CMS-agnostic pseudonymisation of a relational database: consistent fake
