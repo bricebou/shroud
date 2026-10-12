@@ -123,6 +123,9 @@ final class NestedStrategiesTest extends StrategyTestCase
 
         self::assertSame('{}', self::apply($keep, '{}'), 'an empty object stays an object');
         self::assertSame('[]', self::apply($keep, '[]'));
+        self::assertSame('{"a":{},"b":[],"c":[{}]}', self::apply($keep, '{"a":{},"b":[],"c":[{}]}'), 'at any depth');
+        self::assertSame('{"0":"x","1":{"0":"y"}}', self::apply($keep, '{"0":"x","1":{"0":"y"}}'), 'an object keyed 0, 1, 2… is no list');
+        self::assertSame('{"":1}', self::apply($keep, '{"":1}'));
         self::assertSame('{"ratio":1.0,"path":"a/b","name":"Zoé"}', self::apply($keep, '{"ratio":1.0,"path":"a\/b","name":"Zoé"}'));
     }
 

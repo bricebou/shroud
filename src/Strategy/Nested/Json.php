@@ -12,8 +12,8 @@ use Shroud\Strategy\RelayingObserverInterface;
 /**
  * Transforms a JSON document key by key, and encodes it again.
  *
- * An empty object stays an object and a float keeps its fraction. A value that is not JSON is
- * refused: an old base that carries some declares a `Fallback`.
+ * Every object stays an object, even empty or keyed 0, 1, 2…, at any depth, and a float keeps its
+ * fraction. A value that is not JSON is refused: an old base that carries some declares a `Fallback`.
  */
 final class Json extends AbstractTextStrategy implements RelayingObserverInterface
 {
@@ -51,15 +51,28 @@ final class Json extends AbstractTextStrategy implements RelayingObserverInterfa
         }
 
         $result = $this->content->apply($data, $context);
-        // Decoded as an array, an empty object would come back as `[]`.
-        if ($result === [] && str_starts_with(ltrim($value), '{')) {
-            return '{}';
-        }
 
         try {
-            return json_encode($result, self::ENCODING);
+            return json_encode(self::restoreObjects(json_decode($value, flags: JSON_THROW_ON_ERROR), $result), self::ENCODING);
         } catch (\JsonException $exception) {
             throw new InvalidValueException($context->table, $context->column, 'unencodable JSON: ' . $exception->getMessage(), $exception);
         }
+    }
+
+    /**
+     * Gives the transformed data back the objects of the original document: decoded as arrays, an
+     * empty object or one keyed 0, 1, 2… would be encoded again as a list.
+     */
+    private static function restoreObjects(mixed $original, mixed $result): mixed
+    {
+        if (! is_array($result)) {
+            return $result;
+        }
+        $items = $original instanceof \stdClass ? get_object_vars($original) : (is_array($original) ? $original : []);
+        foreach ($result as $key => $item) {
+            $result[$key] = self::restoreObjects($items[$key] ?? null, $item);
+        }
+
+        return $original instanceof \stdClass ? (object) $result : $result;
     }
 }
