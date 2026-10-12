@@ -127,6 +127,8 @@ and the declaration is written by hand, with `shroud-diff` drafting it.
   disappears.
 - [The commands](docs/commands.md): `shroud-dump` and its dry run, `shroud-diff` and its draft,
   `shroud-baseline`, the project file.
+- [On the fly](docs/on-the-fly.md): disguising rows as they are read, for a test suite or an
+  indexing job that runs against the real base.
 - [Development](docs/development.md): tools, standards and conventions.
 
 ## License

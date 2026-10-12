@@ -53,7 +53,8 @@ the polymorphic links whose type is renumbered, the ids inside the blobs, the re
 platform embeds in the texts. A link to an object of a type that is not renumbered stays as it
 is. `new Generator($salt, renumbering: false)`, or `Configuration::disguiser(renumbering: false)`,
 turns the renumbering off without touching the declaration: a pass on the fly over a live base
-then keeps its ids, so that what the site reads back by id lands on the same object.
+then keeps its ids, so that what the site reads back by id lands on the same object
+([On the fly](on-the-fly.md)).
 
 The email of a pseudonym carries the renumbered id of its object in base 36: unique within its
 type, even for two objects that draw the same names, which a unique key on the column requires.
