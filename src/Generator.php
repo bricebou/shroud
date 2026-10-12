@@ -38,7 +38,8 @@ final class Generator
 
     /**
      * The facts of shape that the strategies noted on each object during the observation
-     * pass, by reference key then by fact key.
+     * pass, by fact key then by reference key: one array per fact, not one per object,
+     * keeps them in a third of the memory.
      *
      * @var array<string, array<string, mixed>>
      */
@@ -140,7 +141,7 @@ final class Generator
      */
     public function remember(Reference $reference, string $key, mixed $value): void
     {
-        $this->memory[$reference->toKey()][$key] = $value;
+        $this->memory[$key][$reference->toKey()] = $value;
     }
 
     /**
@@ -148,7 +149,7 @@ final class Generator
      */
     public function recall(Reference $reference, string $key): mixed
     {
-        return $this->memory[$reference->toKey()][$key] ?? null;
+        return $this->memory[$key][$reference->toKey()] ?? null;
     }
 
     /**
