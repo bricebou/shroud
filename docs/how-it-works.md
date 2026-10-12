@@ -29,14 +29,17 @@ what they need:
 
 ## The generator
 
-The **generator** reseeds Faker before each value with a digest of the salt, the table, the
-key of the row and the column; the pseudonym of an object is drawn the same way, from the salt
-and its reference. Two runs give the same result, whatever the order of the rows.
+The **generator** draws each value from the SHA-256 blocks of the salt, the table, the key of
+the row and the column; the pseudonym of an object is drawn the same way, from the salt and its
+reference, each of its fields on its own. No draw shares a state with another, nor with the
+random generator of PHP: two runs give the same result, whatever the order of the rows, the
+version of PHP or the libraries loaded beside.
 
-The Faker locale chooses the lists of first names, last names and cities. The **language**
-holds the conventions that the shape-preserving replacement follows: the diacritic to put on a
-replacement whose original carried one, the elided words to drop, `d'Aubigné`. The core ships
-`French` and `Plain`, which follows no convention.
+The **language** holds the words a fake identity is drawn from, first names by gender, last
+names, streets, cities, organizations, and the conventions that the shape-preserving
+replacement follows: the diacritic to put on a replacement whose original carried one, the
+elided words to drop, `d'Aubigné`, the civilities. The core ships `French` and `English`; their
+lists come from Faker, reviewed, and live in `resources/words`.
 
 The **platform** holds what belongs to the CMS: the markup of its texts to leave untouched,
 beyond HTML, and the references it embeds in them, which follow the renumbering of their

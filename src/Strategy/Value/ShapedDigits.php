@@ -35,11 +35,11 @@ final class ShapedDigits extends AbstractTextStrategy
             $start = strlen($diallingCode[0]);
         }
 
-        $faker = $context->seedFaker();
+        $draw = $context->draw();
         $result = substr($value, 0, $start);
         $length = strlen($value);
         for ($i = $start; $i < $length; ++$i) {
-            $result .= ctype_digit($value[$i]) ? (string) $faker->randomDigit() : $value[$i];
+            $result .= ctype_digit($value[$i]) ? (string) $draw->digit() : $value[$i];
         }
 
         return $result;

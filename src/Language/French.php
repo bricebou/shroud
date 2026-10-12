@@ -11,6 +11,8 @@ use Shroud\Identity\Gender;
  */
 final class French implements LanguageInterface
 {
+    private static ?Vocabulary $vocabulary = null;
+
     /**
      * The diacritic that French puts on a letter, by letter, the first markable letter of a word taking it.
      *
@@ -72,5 +74,10 @@ final class French implements LanguageInterface
     public function defaultCivility(Gender $gender): string
     {
         return $gender === Gender::Female ? 'Mme' : 'M.';
+    }
+
+    public function vocabulary(): Vocabulary
+    {
+        return self::$vocabulary ??= Vocabulary::fromFile(__DIR__ . '/../../resources/words/fr.php');
     }
 }

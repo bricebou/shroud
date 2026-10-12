@@ -4,29 +4,30 @@ declare(strict_types=1);
 
 namespace Shroud\Tests\Unit\Identity;
 
-use Faker\Factory;
-use Faker\Generator as Faker;
-use Faker\Provider\en_US\Person as FakerPerson;
 use PHPUnit\Framework\TestCase;
 use Shroud\Identity\Gender;
 use Shroud\Identity\Pseudonym;
+use Shroud\Language\English;
+use Shroud\Language\French;
+use Shroud\Language\Vocabulary;
+use Shroud\Random\Draw;
 
 final class PseudonymTest extends TestCase
 {
     public function testTheDrawDependsOnlyOnTheSeed(): void
     {
-        self::assertEquals(Pseudonym::draw($this->faker(42), 'x1'), Pseudonym::draw($this->faker(42), 'x1'));
-        self::assertNotEquals(Pseudonym::draw($this->faker(42), 'x1')->email, Pseudonym::draw($this->faker(43), 'x1')->email);
+        self::assertEquals($this->draw('42'), $this->draw('42'));
+        self::assertNotEquals($this->draw('42')->email, $this->draw('43')->email);
     }
 
     public function testTheNamesAreReservesOfSingleWords(): void
     {
-        $pseudonym = Pseudonym::draw($this->faker(42), 'x1');
+        $pseudonym = $this->draw('42');
 
         self::assertCount(5, $pseudonym->firstNames);
         self::assertCount(5, $pseudonym->lastNames);
         foreach ([...$pseudonym->firstNames, ...$pseudonym->lastNames] as $word) {
-            self::assertStringNotContainsString(' ', $word);
+            self::assertMatchesRegularExpression('/^\p{L}+$/u', $word);
         }
         self::assertSame($pseudonym->lastNames, $pseudonym->listFullNameWords(0));
         self::assertSame($pseudonym->lastNames, $pseudonym->listFullNameWords(-1));
@@ -36,13 +37,13 @@ final class PseudonymTest extends TestCase
 
     public function testTheFirstNamesFollowTheDrawnGender(): void
     {
+        /** @var array{firstNames: array{female: list<string>, male: list<string>}} $lists */
+        $lists = require __DIR__ . '/../../../resources/words/en.php';
         $genders = [];
         for ($seed = 1; $seed <= 20; ++$seed) {
-            $pseudonym = Pseudonym::draw($this->faker($seed), 'x' . $seed);
-            $names = new \ReflectionProperty(FakerPerson::class, $pseudonym->gender === Gender::Female ? 'firstNameFemale' : 'firstNameMale')->getValue();
-            self::assertIsArray($names);
+            $pseudonym = $this->draw((string) $seed);
             foreach ($pseudonym->firstNames as $firstName) {
-                self::assertContains($firstName, $names, "seed {$seed}");
+                self::assertContains($firstName, $lists['firstNames'][$pseudonym->gender->value], "seed {$seed}");
             }
             $genders[$pseudonym->gender->value] = true;
         }
@@ -50,9 +51,19 @@ final class PseudonymTest extends TestCase
         self::assertCount(2, $genders, 'both genders are drawn');
     }
 
-    public function testTheEmailJoinsTheFirstNamesTheSuffixAndASafeDomain(): void
+    /**
+     * A field has a draw of its own: another vocabulary changes the names, not the gender.
+     */
+    public function testEachFieldHasADrawOfItsOwn(): void
     {
-        $pseudonym = Pseudonym::draw($this->faker(42), 'x1');
+        for ($seed = 1; $seed <= 20; ++$seed) {
+            self::assertSame($this->draw((string) $seed)->gender, $this->draw((string) $seed, new French()->vocabulary())->gender);
+        }
+    }
+
+    public function testTheEmailJoinsTheFirstNamesTheSuffixAndAReservedDomain(): void
+    {
+        $pseudonym = $this->draw('42');
 
         self::assertMatchesRegularExpression('/^[a-z0-9-]+\.[a-z0-9-]+-x1$/', $pseudonym->handle);
         self::assertMatchesRegularExpression('/^[a-z0-9-]+\.[a-z0-9-]+-x1@example\.(org|com|net)$/', $pseudonym->email);
@@ -61,32 +72,36 @@ final class PseudonymTest extends TestCase
 
     public function testTheOrganizationWordsAreNeverEmpty(): void
     {
-        $pseudonym = Pseudonym::draw($this->faker(42), 'x1');
+        $pseudonym = $this->draw('42');
 
         self::assertGreaterThanOrEqual(8, count($pseudonym->organizationWords));
         self::assertNotContains('', $pseudonym->organizationWords);
         self::assertMatchesRegularExpression('/^[a-z0-9-]+\.example$/', $pseudonym->domain, 'a reserved top-level domain');
-        self::assertNotSame('', $pseudonym->street);
-        self::assertNotSame('', $pseudonym->postalCode);
+        self::assertMatchesRegularExpression('/^\d+ \p{L}+ \p{L}+$/u', $pseudonym->street);
+        self::assertMatchesRegularExpression('/^\d{5}$/', $pseudonym->postalCode);
         self::assertNotSame('', $pseudonym->city);
+    }
+
+    public function testFrenchComposesItsAddressesTheFrenchWay(): void
+    {
+        $pseudonym = $this->draw('42', new French()->vocabulary());
+
+        self::assertMatchesRegularExpression('/^\d{1,3}, (rue|chemin|avenue|boulevard|place|impasse) /', $pseudonym->street);
     }
 
     public function testUnpackingGivesBackThePackedPseudonym(): void
     {
-        foreach (['en_US', 'fr_FR', 'de_DE', 'ja_JP'] as $locale) {
+        foreach ([new English(), new French()] as $language) {
             for ($seed = 1; $seed <= 50; ++$seed) {
-                $pseudonym = Pseudonym::draw($this->faker($seed, $locale), 'x' . $seed);
+                $pseudonym = $this->draw((string) $seed, $language->vocabulary());
 
-                self::assertEquals($pseudonym, Pseudonym::unpack($pseudonym->pack()), "{$locale}, seed {$seed}");
+                self::assertEquals($pseudonym, Pseudonym::unpack($pseudonym->pack()), $language::class . ", seed {$seed}");
             }
         }
     }
 
-    private function faker(int $seed, string $locale = 'en_US'): Faker
+    private function draw(string $seed, ?Vocabulary $vocabulary = null): Pseudonym
     {
-        $faker = Factory::create($locale);
-        $faker->seed($seed);
-
-        return $faker;
+        return Pseudonym::draw($vocabulary ?? new English()->vocabulary(), new Draw($seed), 'x1');
     }
 }

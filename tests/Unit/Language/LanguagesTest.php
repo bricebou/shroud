@@ -6,8 +6,8 @@ namespace Shroud\Tests\Unit\Language;
 
 use PHPUnit\Framework\TestCase;
 use Shroud\Identity\Gender;
+use Shroud\Language\English;
 use Shroud\Language\French;
-use Shroud\Language\Plain;
 
 final class LanguagesTest extends TestCase
 {
@@ -34,35 +34,35 @@ final class LanguagesTest extends TestCase
         self::assertNotContains('a', $elided);
     }
 
-    public function testPlainMarksNothingAndElidesNothing(): void
+    public function testEnglishMarksNothingAndElidesNothing(): void
     {
-        $plain = new Plain();
+        $english = new English();
 
-        self::assertSame('ete', $plain->markDiacritic('ete'));
-        self::assertSame('', $plain->markDiacritic(''));
-        self::assertSame([], $plain->elidedWords());
+        self::assertSame('ete', $english->markDiacritic('ete'));
+        self::assertSame('', $english->markDiacritic(''));
+        self::assertSame([], $english->elidedWords());
     }
 
     public function testACivilityKeepsItsFormAndTakesTheGender(): void
     {
         $french = new French();
-        $plain = new Plain();
+        $english = new English();
 
         self::assertSame('M.', $french->civility('Mme', Gender::Male));
         self::assertSame('Mme', $french->civility('Mlle', Gender::Female));
         self::assertSame('Monsieur', $french->civility('MADEMOISELLE', Gender::Male));
-        self::assertSame('Mrs.', $plain->civility('Ms.', Gender::Female));
-        self::assertSame('Mr', $plain->civility('Miss', Gender::Male));
+        self::assertSame('Mrs.', $english->civility('Ms.', Gender::Female));
+        self::assertSame('Mr', $english->civility('Miss', Gender::Male));
         self::assertNull($french->civility('Miss', Gender::Male), 'a civility of another language');
         self::assertSame('Mme', $french->civility('M', Gender::Female), 'the dot often goes missing');
         self::assertSame('M', $french->civility('M', Gender::Male));
         self::assertSame('Mr', $french->civility('Mr', Gender::Male), 'and Mr often stands for M.');
-        self::assertNull($plain->civility('Mister', Gender::Female), 'no feminine counterpart');
-        self::assertSame('Sir', $plain->civility('Madam', Gender::Male));
-        self::assertSame('Madam', $plain->civility('Sir', Gender::Female));
-        self::assertSame('Mr', $plain->civility('Mrs', Gender::Male), 'British, without the dot');
-        self::assertNull($plain->civility('Dr', Gender::Male));
+        self::assertNull($english->civility('Mister', Gender::Female), 'no feminine counterpart');
+        self::assertSame('Sir', $english->civility('Madam', Gender::Male));
+        self::assertSame('Madam', $english->civility('Sir', Gender::Female));
+        self::assertSame('Mr', $english->civility('Mrs', Gender::Male), 'British, without the dot');
+        self::assertNull($english->civility('Dr', Gender::Male));
         self::assertSame('Mme', $french->defaultCivility(Gender::Female));
-        self::assertSame('Mr', $plain->defaultCivility(Gender::Male));
+        self::assertSame('Mr', $english->defaultCivility(Gender::Male));
     }
 }

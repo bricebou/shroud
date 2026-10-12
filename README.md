@@ -37,7 +37,8 @@ demonstrations or hand-overs.
   of the platform and the language of the schema.
 
 The core knows no CMS. It handles arrays of rows, a declaration and a generator, and depends on
-Faker alone. A platform package brings what belongs to a CMS: its bare declaration, its frozen
+no other library: its draws come from SHA-256, its word lists, first names, last names, streets,
+cities, from Faker, reviewed and frozen in `resources/words`. A platform package brings what belongs to a CMS: its bare declaration, its frozen
 schemas, the markup of its texts, the references it embeds in them, its connection file and its
 column vocabulary. See [Platforms](#platforms).
 
@@ -167,4 +168,5 @@ and the declaration is written by hand, with `shroud-diff` drafting it.
 
 ## License
 
-Shroud is released under the [MIT License](LICENSE).
+Shroud is released under the [MIT License](LICENSE). The word lists of `resources/words` come
+from [Faker](https://github.com/FakerPHP/Faker), released under the MIT License as well.

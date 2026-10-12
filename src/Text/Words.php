@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Shroud\Text;
 
-use Faker\Generator as Faker;
+use Shroud\Random\Draw;
 
 /**
  * Handles words as units: extracting them from a text, drawing fillers, slugging.
@@ -22,6 +22,13 @@ final class Words
     private static ?\Transliterator $toAscii = null;
 
     /**
+     * The filler words, loaded once.
+     *
+     * @var ?non-empty-list<string>
+     */
+    private static ?array $lorem = null;
+
+    /**
      * Lists the words of a text, in order.
      *
      * @return list<string>
@@ -34,19 +41,20 @@ final class Words
     }
 
     /**
-     * Draws filler words from a seeded Faker.
+     * Draws filler words, latin-looking, tied to no language.
      *
      * @return list<string>
      */
-    public static function lorem(Faker $faker, int $count): array
+    public static function lorem(Draw $draw, int $count): array
     {
-        if ($count <= 0) {
-            return [];
+        /** @var non-empty-list<string> $words */
+        $words = self::$lorem ??= require __DIR__ . '/../../resources/words/lorem.php';
+        $fillers = [];
+        for ($i = 0; $i < $count; ++$i) {
+            $fillers[] = $draw->pick($words);
         }
-        // Faker returns an array of words, or a string when asked for text: normalise.
-        $words = $faker->words($count);
 
-        return is_array($words) ? array_values(array_map(strval(...), $words)) : [$words];
+        return $fillers;
     }
 
     /**

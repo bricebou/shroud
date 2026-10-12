@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Shroud\Tests\Unit\Text;
 
-use Faker\Factory;
 use PHPUnit\Framework\TestCase;
+use Shroud\Random\Draw;
 use Shroud\Text\Words;
 
 final class WordsTest extends TestCase
@@ -17,19 +17,16 @@ final class WordsTest extends TestCase
         self::assertSame(['Œuvre', 'd', 'été'], Words::extract("Œuvre d'été !"));
     }
 
-    public function testFillersAreDrawnFromTheSeededFaker(): void
+    public function testFillersAreDrawnFromTheDraw(): void
     {
-        $faker = Factory::create('en_US');
-
-        $faker->seed(42);
-        $first = Words::lorem($faker, 3);
-        $faker->seed(42);
-        $second = Words::lorem($faker, 3);
+        $first = Words::lorem(new Draw('seed'), 3);
 
         self::assertCount(3, $first);
-        self::assertSame($first, $second);
-        self::assertSame([], Words::lorem($faker, 0));
-        self::assertSame([], Words::lorem($faker, -1));
+        self::assertSame($first, Words::lorem(new Draw('seed'), 3));
+        self::assertNotSame($first, Words::lorem(new Draw('another seed'), 3));
+        self::assertMatchesRegularExpression('/^\p{Ll}+$/u', $first[0]);
+        self::assertSame([], Words::lorem(new Draw('seed'), 0));
+        self::assertSame([], Words::lorem(new Draw('seed'), -1));
     }
 
     public function testAsciiDropsTheDiacriticsAndLigatures(): void

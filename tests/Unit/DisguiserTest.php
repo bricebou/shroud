@@ -15,6 +15,7 @@ use Shroud\Exception\TruncatedTableException;
 use Shroud\Exception\UndeclaredColumnException;
 use Shroud\Exception\UndeclaredTableException;
 use Shroud\Generator;
+use Shroud\Language\English;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\LastName;
 use Shroud\Strategy\Value\Keep;
@@ -223,9 +224,9 @@ final class DisguiserTest extends TestCase
         self::assertNotSame($withoutPerson['last_name'], $withPerson['last_name']);
     }
 
-    public function testAnEnglishLocaleDrawsEnglishNamesWithoutDiacritics(): void
+    public function testEnglishDrawsEnglishNamesWithoutDiacritics(): void
     {
-        $result = Fixture::disguiser(locale: 'en_US')->disguiseTables(self::TABLES);
+        $result = Fixture::disguiser(language: new English())->disguiseTables(self::TABLES);
 
         self::assertIsString($result['people'][0]['name']);
         self::assertMatchesRegularExpression('/^[A-Z][a-z]+ [A-Z][a-z]+$/', $result['people'][0]['name']);

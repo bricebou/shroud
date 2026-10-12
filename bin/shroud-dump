@@ -36,7 +36,7 @@ Usage:
 
 Other options:
   --config    the configuration file of the project, which returns a Configuration object:
-              declaration of the tables, salt, locale, platform; shroud.php of the current directory by default
+              declaration of the tables, salt, language, platform; shroud.php of the current directory by default
   --output    the file to write; the standard output by default
   --dry-run   reads the whole base and passes every row through the strategies without writing
               anything, then reports the refusals by table, column and reason

@@ -7,12 +7,12 @@ namespace Shroud\Language;
 use Shroud\Identity\Gender;
 
 /**
- * Follows no convention of its own: a replacement keeps the plain word it was given.
- *
- * Its civilities are those of English, the language of the default Faker locale.
+ * Follows the conventions of English: no diacritic, no elision, the civilities and the words of English.
  */
-final class Plain implements LanguageInterface
+final class English implements LanguageInterface
 {
+    private static ?Vocabulary $vocabulary = null;
+
     public function markDiacritic(string $word): string
     {
         return $word;
@@ -39,5 +39,10 @@ final class Plain implements LanguageInterface
     public function defaultCivility(Gender $gender): string
     {
         return $gender === Gender::Female ? 'Mrs' : 'Mr';
+    }
+
+    public function vocabulary(): Vocabulary
+    {
+        return self::$vocabulary ??= Vocabulary::fromFile(__DIR__ . '/../../resources/words/en.php');
     }
 }

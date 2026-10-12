@@ -27,14 +27,14 @@ abstract class AbstractShapedWords extends AbstractTextStrategy
         $words = $this->provideWords($context, $value);
         $missing = $text->countWords($value) - count($words);
         if ($missing > 0) {
-            $words = [...$words, ...Words::lorem($context->seedFaker(), $missing)];
+            $words = [...$words, ...Words::lorem($context->draw()->for('words'), $missing)];
         }
 
         // The codes after the words: a replacement never carries a digit, nothing is rewritten twice.
         $result = $text->replaceWords($value, static fn (int $rank): string => $words[$rank] ?? 'lorem')
             ?? throw new InvalidValueException($context->table, $context->column, 'invalid UTF-8');
-        $faker = $context->seedFaker();
-        $result = $text->replaceCodes($result, static fn (): string => $faker->randomLetter(), static fn (): int => $faker->randomDigit());
+        $draw = $context->draw()->for('codes');
+        $result = $text->replaceCodes($result, $draw->letter(...), $draw->digit(...));
 
         // The embedded references, left untouched so far, follow the renumbering of their object.
         return $context->generator->platform()->renumberReferences($result, $context);

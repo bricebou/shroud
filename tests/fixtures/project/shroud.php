@@ -31,7 +31,6 @@ $declaration = $platform->bareDeclaration()->with(
 return new Configuration(
     declaration: $declaration,
     salt: 'a salt of the project, chosen once and for all',
-    locale: 'fr_FR',
     language: new French(),
     platform: $platform,
     glossaries: [new FrenchGlossary(), new English()],

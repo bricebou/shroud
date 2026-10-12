@@ -52,13 +52,14 @@ final class ContextTest extends TestCase
         self::assertNull($context->recall('words'));
     }
 
-    public function testTheSeedIsThatOfTheTableTheRowAndTheColumn(): void
+    public function testTheDrawIsThatOfTheTableTheRowAndTheColumn(): void
     {
         $generator = new Generator('test salt');
-        $draw = fn (string $key, string $column): string => new Context('people', $column, $key, [], reference: null, generator: $generator)->seedFaker()->word();
+        $draw = fn (string $key, string $column): int => new Context('people', $column, $key, [], reference: null, generator: $generator)->draw()->int(0, PHP_INT_MAX >> 32);
 
-        self::assertSame($generator->seedFaker('people', '42', 'value')->word(), $draw('42', 'value'));
+        self::assertSame($generator->draw('people', '42', 'value')->int(0, PHP_INT_MAX >> 32), $draw('42', 'value'));
         self::assertSame($draw('42', 'value'), $draw('42', 'value'));
+        self::assertNotSame($draw('42', 'value'), $draw('43', 'value'));
     }
 
     public function testTheDeclarationIsEmptyUnlessGiven(): void

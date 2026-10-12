@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Shroud;
 
-use Faker\Factory;
-use Faker\Generator as Faker;
 use Shroud\Identity\Permutation;
 use Shroud\Identity\Pseudonym;
 use Shroud\Identity\Reference;
+use Shroud\Language\English;
 use Shroud\Language\LanguageInterface;
-use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
 use Shroud\Platform\PlatformInterface;
+use Shroud\Random\Draw;
 use Shroud\Text\Text;
 
 /**
@@ -20,8 +19,6 @@ use Shroud\Text\Text;
  */
 final class Generator
 {
-    private readonly Faker $faker;
-
     /**
      * The pseudonyms drawn so far, packed, by reference key.
      *
@@ -46,19 +43,16 @@ final class Generator
     private array $memory = [];
 
     /**
-     * @param string $locale the Faker locale, which picks the lists of names and cities
      * @param bool $renumbering false to leave every id untouched
-     * @param LanguageInterface $language the conventions that the shape-preserving replacement follows
+     * @param LanguageInterface $language the words of the fake identities and the conventions that the shape-preserving replacement follows
      * @param PlatformInterface $platform the platform that owns the base, generic by default
      */
     public function __construct(
         private readonly string $salt,
-        string $locale = Factory::DEFAULT_LOCALE,
         private readonly bool $renumbering = true,
-        private readonly LanguageInterface $language = new Plain(),
+        private readonly LanguageInterface $language = new English(),
         private readonly PlatformInterface $platform = new Generic(),
     ) {
-        $this->faker = Factory::create($locale);
     }
 
     /**
@@ -86,28 +80,11 @@ final class Generator
     }
 
     /**
-     * Reseeds Faker from the salt and the keys: any sequence of draws depends on them alone.
-     *
-     * Faker seeds the global generator of PHP. The draws must follow at once, before any other
-     * call to `seedFaker()`, or they mix with another sequence.
+     * Returns the draw of the salt and the keys: the same keys give the same draws, nothing else moves them.
      */
-    public function seedFaker(string|int ...$keys): Faker
+    public function draw(string|int ...$keys): Draw
     {
-        $this->faker->seed($this->computeSeed(...$keys));
-
-        return $this->faker;
-    }
-
-    /**
-     * Computes the integer seed of the salt and the keys.
-     *
-     * SHA-256 of the salt and the keys, separated by a control character so that no
-     * concatenation equals another; the first eight hexadecimal digits give the 32-bit
-     * integer that `mt_srand()` expects.
-     */
-    public function computeSeed(string|int ...$keys): int
-    {
-        return (int) hexdec(substr($this->digest(...$keys), 0, 8));
+        return new Draw($this->digest(...$keys));
     }
 
     /**
@@ -155,14 +132,15 @@ final class Generator
     /**
      * Returns the pseudonym of an object, drawn only once.
      *
-     * The seed depends only on the salt and the reference: the same object receives the same
+     * The draw depends only on the salt and the reference: the same object receives the same
      * pseudonym from one run to the next, drawn at its first encounter and kept for the others.
      */
     public function pseudonymFor(Reference $reference): Pseudonym
     {
         return Pseudonym::unpack($this->pseudonyms[$reference->toKey()]
             ??= Pseudonym::draw(
-                $this->seedFaker('pseudonym', $reference->type, $reference->id),
+                $this->language->vocabulary(),
+                $this->draw('pseudonym', $reference->type, $reference->id),
                 $this->pseudonymSuffix($reference),
             )->pack());
     }

@@ -8,8 +8,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Shroud\Generator;
 use Shroud\Identity\Gender;
+use Shroud\Language\English;
 use Shroud\Language\French;
-use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
 use Shroud\Tests\Unit\Platform\TestPlatform;
 use Shroud\Text\Text;
@@ -44,18 +44,18 @@ final class TextTest extends TestCase
     {
         self::assertSame('Gàmma', $this->french()->replaceWords('Zoé', static fn (): string => 'gamma'));
         self::assertSame('ÀLPHA', $this->french()->replaceWords('ÉLIG', static fn (): string => 'alpha'));
-        self::assertSame('Gamma', $this->plain()->replaceWords('Zoé', static fn (): string => 'gamma'), 'a plain language marks nothing');
+        self::assertSame('Gamma', $this->english()->replaceWords('Zoé', static fn (): string => 'gamma'), 'English marks nothing');
     }
 
     public function testAPlainLanguageElidesNothing(): void
     {
-        self::assertSame("Alpha beta'Gamma", $this->plain()->replaceWords("Marie d'Aubigné", static fn (int $rank): string => ['alpha', 'beta', 'gamma'][$rank]));
-        self::assertSame(3, $this->plain()->countWords("Marie d'Aubigné"));
+        self::assertSame("Alpha beta'Gamma", $this->english()->replaceWords("Marie d'Aubigné", static fn (int $rank): string => ['alpha', 'beta', 'gamma'][$rank]));
+        self::assertSame(3, $this->english()->countWords("Marie d'Aubigné"));
     }
 
     public function testTheGenericPlatformOnlyKeepsHtml(): void
     {
-        $generic = new Text(new Generic(), new Plain());
+        $generic = new Text(new Generic(), new English());
 
         self::assertSame('<b>Alpha</b> beta#gamma:12', $generic->replaceWords('<b>Hello</b> see#person:12', static fn (int $rank): string => ['alpha', 'beta', 'gamma'][$rank]));
     }
@@ -115,7 +115,7 @@ final class TextTest extends TestCase
     public function testTheCivilityOfANameIsSetApartWithItsBlanks(): void
     {
         self::assertSame(['M. ', 'Claire Dupont'], $this->french()->splitCivility('Mme Claire Dupont', Gender::Male));
-        self::assertSame([' Mrs.  ', 'Jane Doe '], $this->plain()->splitCivility(' Mr.  Jane Doe ', Gender::Female));
+        self::assertSame([' Mrs.  ', 'Jane Doe '], $this->english()->splitCivility(' Mr.  Jane Doe ', Gender::Female));
         self::assertSame(['', 'Prof. Anna Schmidt'], $this->french()->splitCivility('Prof. Anna Schmidt', Gender::Female));
         self::assertSame(['', 'Madame'], $this->french()->splitCivility('Madame', Gender::Male), 'a civility alone stands for the person');
         self::assertSame(['', 'Madame '], $this->french()->splitCivility('Madame ', Gender::Male));
@@ -126,8 +126,8 @@ final class TextTest extends TestCase
         return new Text(new TestPlatform(), new French());
     }
 
-    private function plain(): Text
+    private function english(): Text
     {
-        return new Text(new TestPlatform(), new Plain());
+        return new Text(new TestPlatform(), new English());
     }
 }

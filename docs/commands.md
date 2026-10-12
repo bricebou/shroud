@@ -8,7 +8,7 @@ of a bare platform. All three read the same project file and connect the same wa
 ## What the commands share
 
 The project settles once, in a `shroud.php` file versioned at its root, its declaration, its
-salt, its locale, its language, its platform and its glossaries;
+salt, its language, its platform and its glossaries;
 [`examples/shroud.php`](examples/shroud.php) gives the model. The commands read it in the
 current directory, or in the file that `--config` names.
 

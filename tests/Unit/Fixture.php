@@ -10,6 +10,7 @@ use Shroud\Declaration\Table;
 use Shroud\Disguiser;
 use Shroud\Generator;
 use Shroud\Language\French;
+use Shroud\Language\LanguageInterface;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
@@ -44,8 +45,8 @@ final class Fixture
     /**
      * A disguiser of the fixture, in French so that the diacritics show.
      */
-    public static function disguiser(string $salt = self::SALT, string $locale = 'fr_FR'): Disguiser
+    public static function disguiser(string $salt = self::SALT, LanguageInterface $language = new French()): Disguiser
     {
-        return new Disguiser(self::declaration(), new Generator($salt, $locale, language: $locale === 'fr_FR' ? new French() : new \Shroud\Language\Plain()));
+        return new Disguiser(self::declaration(), new Generator($salt, language: $language));
     }
 }

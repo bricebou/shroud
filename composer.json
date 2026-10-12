@@ -6,7 +6,6 @@
     "keywords": [
         "anonymisation",
         "database",
-        "faker",
         "gdpr",
         "privacy",
         "pseudonymisation"
@@ -23,8 +22,7 @@
         "php": "^8.4",
         "ext-intl": "*",
         "ext-mbstring": "*",
-        "ext-pdo": "*",
-        "fakerphp/faker": "^1.24"
+        "ext-pdo": "*"
     },
     "require-dev": {
         "php-parallel-lint/php-parallel-lint": "^1.4",

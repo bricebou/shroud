@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use Shroud\Generator;
 use Shroud\Identity\Permutation;
 use Shroud\Identity\Reference;
+use Shroud\Language\English;
 use Shroud\Language\French;
-use Shroud\Language\Plain;
 
 final class GeneratorTest extends TestCase
 {
@@ -67,16 +67,14 @@ final class GeneratorTest extends TestCase
         self::assertSame(12, $permutation->invert(12));
     }
 
-    public function testTheSeedDependsOnlyOnTheSaltAndTheKeys(): void
+    public function testTheDrawDependsOnlyOnTheSaltAndTheKeys(): void
     {
         $generator = new Generator(self::SALT);
+        $number = static fn (Generator $generator, string|int ...$keys): int => $generator->draw(...$keys)->int(0, 0xFFFFFFFF);
 
-        self::assertSame($generator->seedFaker('a', 1)->word(), $generator->seedFaker('a', 1)->word());
-        self::assertSame($generator->computeSeed('a', 1), new Generator(self::SALT)->computeSeed('a', '1'));
-        self::assertNotSame($generator->computeSeed('a', 1), $generator->computeSeed('a1'), 'keys are separated');
-        self::assertNotSame($generator->computeSeed('a', 1), new Generator('another salt')->computeSeed('a', 1));
-        self::assertGreaterThanOrEqual(0, $generator->computeSeed('a'));
-        self::assertLessThanOrEqual(0xFFFFFFFF, $generator->computeSeed('a'));
+        self::assertSame($number($generator, 'a', 1), $number(new Generator(self::SALT), 'a', '1'));
+        self::assertNotSame($number($generator, 'a', 1), $number($generator, 'a1'), 'keys are separated');
+        self::assertNotSame($number($generator, 'a', 1), $number(new Generator('another salt'), 'a', 1));
         self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $generator->digest('a'));
     }
 
@@ -93,13 +91,12 @@ final class GeneratorTest extends TestCase
         self::assertNull($generator->recall($author, 'other'));
     }
 
-    public function testTheLanguageIsPlainUnlessGiven(): void
+    public function testTheLanguageIsEnglishUnlessGiven(): void
     {
         $french = new French();
 
-        self::assertInstanceOf(Plain::class, new Generator(self::SALT)->language());
-        self::assertInstanceOf(Plain::class, new Generator(self::SALT, 'fr_FR')->language(), 'the locale does not pick the language');
-        self::assertSame($french, new Generator(self::SALT, 'fr_FR', language: $french)->language());
+        self::assertInstanceOf(English::class, new Generator(self::SALT)->language());
+        self::assertSame($french, new Generator(self::SALT, language: $french)->language());
     }
 
     private function domainOf(string $email): string

@@ -110,8 +110,8 @@ final class WordStrategiesTest extends StrategyTestCase
     {
         $french = self::context(new Generator(self::SALT, language: new French()));
 
-        self::assertMatchesRegularExpression('/[àâçéèêëîïôùûü]/u', self::applyToString(new FirstName(), 'Zoé', $french));
-        self::assertMatchesRegularExpression('/^[a-zA-Z]+$/', self::applyToString(new FirstName(), 'Zoé'), 'plain: no diacritic');
+        self::assertMatchesRegularExpression('/[^\x00-\x7F]/u', self::applyToString(new FirstName(), 'Zoé', $french));
+        self::assertMatchesRegularExpression('/^[a-zA-Z]+$/', self::applyToString(new FirstName(), 'Zoé'), 'English: no diacritic');
     }
 
     /**
@@ -184,10 +184,12 @@ final class WordStrategiesTest extends StrategyTestCase
         $female = $pseudonym->gender === Gender::Female;
         $civility = $female ? 'Mme' : 'M.';
         $name = ucfirst($pseudonym->firstNames[0]) . ' ' . ucfirst($pseudonym->lastNames[0]);
+        $english = $plain->requirePseudonym();
+        self::assertSame($pseudonym->gender, $english->gender, 'the gender does not depend on the language');
 
         self::assertSame($civility . ' ' . $name, self::apply(new FullName(), 'Mme Claire Dupont', $french));
         self::assertSame($civility . ' ' . $name, self::apply(new FullName(), 'M. Jean Dupont', $french));
-        self::assertSame(($female ? 'Mrs. ' : 'Mr. ') . $name, self::apply(new FullName(), 'Mr. John Doe', $plain));
+        self::assertSame(($female ? 'Mrs. ' : 'Mr. ') . ucfirst($english->firstNames[0]) . ' ' . ucfirst($english->lastNames[0]), self::apply(new FullName(), 'Mr. John Doe', $plain));
         self::assertSame($civility, self::apply(new Civility(), 'Mlle', $french));
         self::assertSame($civility, self::apply(new Civility(), 'Dr', $french), 'no civility: the one of the language');
         self::assertSame($female ? 'Mrs' : 'Mr', self::apply(new Civility(), 'Dr', $plain));

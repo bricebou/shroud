@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Shroud;
 
-use Faker\Generator as Faker;
 use Shroud\Declaration\Declaration;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Identity\Pseudonym;
 use Shroud\Identity\Reference;
+use Shroud\Random\Draw;
 use Shroud\Strategy\Wrapper\FallbackListenerInterface;
 
 /**
@@ -74,10 +74,10 @@ final readonly class Context
     }
 
     /**
-     * Seeds Faker for this very value: same table, same row, same column, same draw.
+     * Returns the draw of this very value: same table, same row, same column, same draw.
      */
-    public function seedFaker(): Faker
+    public function draw(): Draw
     {
-        return $this->generator->seedFaker($this->table, $this->key, $this->column);
+        return $this->generator->draw($this->table, $this->key, $this->column);
     }
 }

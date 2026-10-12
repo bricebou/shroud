@@ -30,7 +30,7 @@ final class Url extends AbstractTextStrategy
         $pseudonym = $context->requirePseudonym();
         $words = [...$pseudonym->listFullNameWords(), ...$pseudonym->organizationWords];
         $text = $context->generator->text();
-        $faker = $context->seedFaker();
+        $draw = $context->draw();
         $parts = parse_url($value);
 
         // A `mailto:` in a URL column: the address is that of the pseudonym, nothing else.
@@ -61,7 +61,7 @@ final class Url extends AbstractTextStrategy
             }
             $fake = $text->replaceWords($decoded, static fn (int $rank): string => $words[$rank] ?? 'lorem')
                 ?? throw new InvalidValueException($context->table, $context->column, 'invalid UTF-8');
-            $fake = $text->replaceCodes($fake, static fn (): string => $faker->randomLetter(), static fn (): int => $faker->randomDigit());
+            $fake = $text->replaceCodes($fake, $draw->letter(...), $draw->digit(...));
             $segments[] = $hasHost ? rawurlencode($fake) : $fake;
         }
         if ($this->unique) {

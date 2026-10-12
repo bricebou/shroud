@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use Shroud\Configuration;
 use Shroud\Declaration\Declaration;
 use Shroud\Exception\InvalidConfigurationException;
+use Shroud\Language\English;
 use Shroud\Language\French;
-use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
 use Shroud\Schema\TableSchema;
 use Shroud\Tests\Unit\Platform\TestPlatform;
@@ -20,7 +20,6 @@ final class ConfigurationTest extends TestCase
     {
         $configuration = Configuration::fromFile(__DIR__ . '/../fixtures/project/shroud.php');
 
-        self::assertSame('fr_FR', $configuration->locale);
         self::assertInstanceOf(French::class, $configuration->language);
         self::assertInstanceOf(TestPlatform::class, $configuration->platform);
         self::assertTrue($configuration->declaration->has('visits'));
@@ -105,12 +104,11 @@ final class ConfigurationTest extends TestCase
         self::assertNotSame($configuration->disguiser()->disguiseRow('people', $row), $other->disguiser()->disguiseRow('people', $row));
     }
 
-    public function testTheDefaultsAreGenericAndPlain(): void
+    public function testTheDefaultsAreGenericAndEnglish(): void
     {
         $configuration = new Configuration(new Declaration([]), 'salt');
 
-        self::assertSame('en_US', $configuration->locale);
-        self::assertInstanceOf(Plain::class, $configuration->language);
+        self::assertInstanceOf(English::class, $configuration->language);
         self::assertInstanceOf(Generic::class, $configuration->platform);
         self::assertSame([], $configuration->glossaries);
     }

@@ -1,0 +1,122 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * Word lists drawn from the fr_FR locale of Faker 1.24, https://github.com/FakerPHP/Faker,
+ * released under the MIT License, Copyright (c) 2011 François Zaninotto. Reviewed for
+ * Shroud: a name is a single word of letters, so the entries holding a blank or an apostrophe
+ * ("O'Hara") are left out; the compositions are written anew.
+ */
+
+return [
+    'firstNames' => [
+        'female' => [
+            'Adélaïde', 'Adèle', 'Adrienne', 'Agathe', 'Agnès', 'Aimée', 'Alex', 'Alexandria',
+            'Alexandrie', 'Alice', 'Alix', 'Amélie', 'Anaïs', 'Anastasie', 'Andrée', 'Anne',
+            'Anouk', 'Antoinette', 'Arnaude', 'Astrid', 'Audrey', 'Aurélie', 'Aurore',
+            'Bernadette', 'Brigitte', 'Camille', 'Capucine', 'Caroline', 'Catherine', 'Cécile',
+            'Célina', 'Céline', 'Chantal', 'Charlotte', 'Christelle', 'Christiane', 'Christine',
+            'Claire', 'Claudine', 'Clémence', 'Colette', 'Constance', 'Corinne', 'Danielle',
+            'Denise', 'Diane', 'Dominique', 'Dorothée', 'Édith', 'Éléonore', 'Élisabeth',
+            'Élise', 'Élodie', 'Émilie', 'Emmanuelle', 'Françoise', 'Frédérique',
+            'Gabrielle', 'Geneviève', 'Hélène', 'Henriette', 'Hortense', 'Inès', 'Isabelle',
+            'Jacqueline', 'Jeanne', 'Jeannine', 'Joséphine', 'Josette', 'Julie', 'Juliette',
+            'Laetitia', 'Laure', 'Laurence', 'Lorraine', 'Louise', 'Luce', 'Lucie', 'Lucy',
+            'Madeleine', 'Maggie', 'Manon', 'Marcelle', 'Margaret', 'Margaud', 'Margaux', 'Margot',
+            'Marguerite', 'Marianne', 'Marie', 'Marine', 'Marthe', 'Martine', 'Maryse', 'Mathilde',
+            'Michèle', 'Michelle', 'Monique', 'Nath', 'Nathalie', 'Nicole', 'Noémi', 'Océane',
+            'Odette', 'Olivie', 'Patricia', 'Paulette', 'Pauline', 'Pénélope', 'Philippine',
+            'Renée', 'Sabine', 'Simone', 'Sophie', 'Stéphanie', 'Susan', 'Susanne', 'Suzanne',
+            'Sylvie', 'Thérèse', 'Valentine', 'Valérie', 'Véronique', 'Victoire', 'Virginie',
+            'Zoé',
+        ],
+        'male' => [
+            'Adrien', 'Aimé', 'Alain', 'Alexandre', 'Alfred', 'Alphonse', 'André', 'Antoine',
+            'Arthur', 'Auguste', 'Augustin', 'Benjamin', 'Benoît', 'Bernard', 'Bertrand',
+            'Charles', 'Christophe', 'Claude', 'Daniel', 'David', 'Denis', 'Dominique', 'Édouard',
+            'Émile', 'Emmanuel', 'Éric', 'Étienne', 'Eugène', 'Franck', 'François',
+            'Frédéric', 'Gabriel', 'Georges', 'Gérard', 'Gilbert', 'Gilles', 'Grégoire',
+            'Guillaume', 'Guy', 'Henri', 'Honoré', 'Hugues', 'Isaac', 'Jacques', 'Jean',
+            'Jérôme', 'Joseph', 'Jules', 'Julien', 'Laurent', 'Léon', 'Louis', 'Luc', 'Lucas',
+            'Marc', 'Marcel', 'Martin', 'Matthieu', 'Maurice', 'Michel', 'Nicolas', 'Noël',
+            'Olivier', 'Patrick', 'Paul', 'Philippe', 'Pierre', 'Raymond', 'Rémy', 'René',
+            'Richard', 'Robert', 'Roger', 'Roland', 'Sébastien', 'Stéphane', 'Théodore',
+            'Théophile', 'Thibault', 'Thibaut', 'Thierry', 'Thomas', 'Timothée', 'Tristan',
+            'Victor', 'Vincent', 'William', 'Xavier', 'Yves', 'Zacharie',
+        ],
+    ],
+    'lastNames' => [
+        'Adam', 'Albert', 'Alexandre', 'Allain', 'Allard', 'Alves', 'Andre', 'Antoine', 'Arnaud',
+        'Aubert', 'Aubry', 'Auger', 'Bailly', 'Barbe', 'Barbier', 'Baron', 'Barre', 'Barthelemy',
+        'Baudry', 'Bazin', 'Becker', 'Begue', 'Benard', 'Benoit', 'Berger', 'Bernard', 'Bernier',
+        'Berthelot', 'Bertin', 'Bertrand', 'Besnard', 'Besson', 'Bigot', 'Blanc', 'Blanchard',
+        'Blanchet', 'Blin', 'Blondel', 'Blot', 'Bodin', 'Bonneau', 'Bonnet', 'Bonnin', 'Boucher',
+        'Bouchet', 'Boulanger', 'Boulay', 'Bourdon', 'Bourgeois', 'Bousquet', 'Boutin', 'Bouvet',
+        'Bouvier', 'Boyer', 'Breton', 'Briand', 'Brun', 'Bruneau', 'Brunel', 'Brunet', 'Buisson',
+        'Camus', 'Carlier', 'Caron', 'Carpentier', 'Carre', 'Charles', 'Charpentier', 'Charrier',
+        'Chartier', 'Chauveau', 'Chauvet', 'Chauvin', 'Chevalier', 'Chevallier', 'Chretien',
+        'Clement', 'Clerc', 'Cohen', 'Colas', 'Colin', 'Collet', 'Collin', 'Cordier', 'Costa',
+        'Coste', 'Coulon', 'Courtois', 'Cousin', 'Couturier', 'Daniel', 'David', 'Delahaye',
+        'Delannoy', 'Delattre', 'Delaunay', 'Delmas', 'Delorme', 'Denis', 'Descamps', 'Deschamps',
+        'Devaux', 'Diallo', 'Dias', 'Diaz', 'Didier', 'Dijoux', 'Dubois', 'Dufour', 'Duhamel',
+        'Dumas', 'Dumont', 'Dupont', 'Dupre', 'Dupuis', 'Dupuy', 'Durand', 'Duval', 'Etienne',
+        'Evrard', 'Fabre', 'Faivre', 'Faure', 'Fernandes', 'Fernandez', 'Ferrand', 'Ferreira',
+        'Fischer', 'Fleury', 'Fontaine', 'Foucher', 'Fouquet', 'Fournier', 'Francois', 'Gaillard',
+        'Gallet', 'Garcia', 'Garnier', 'Gaudin', 'Gauthier', 'Gautier', 'Gay', 'Georges', 'Gerard',
+        'Germain', 'Gilbert', 'Gilles', 'Gillet', 'Gimenez', 'Girard', 'Giraud', 'Godard', 'Gomes',
+        'Gomez', 'Goncalves', 'Gonzalez', 'Gosselin', 'Gregoire', 'Grenier', 'Grondin', 'Gros',
+        'Guerin', 'Guibert', 'Guichard', 'Guilbert', 'Guillaume', 'Guillet', 'Guillon', 'Guillot',
+        'Guillou', 'Guyon', 'Guyot', 'Hamel', 'Hamon', 'Hardy', 'Hebert', 'Henry', 'Hernandez',
+        'Herve', 'Hoarau', 'Hoareau', 'Hubert', 'Huet', 'Humbert', 'Imbert', 'Jacob', 'Jacques',
+        'Jacquet', 'Jacquot', 'Jean', 'Joly', 'Joseph', 'Joubert', 'Jourdan', 'Julien', 'Klein',
+        'Labbe', 'Lacombe', 'Lacroix', 'Lagarde', 'Laine', 'Lambert', 'Lamy', 'Langlois',
+        'Laporte', 'Laroche', 'Launay', 'Laurent', 'Leblanc', 'Lebon', 'Lebreton', 'Lebrun',
+        'Leclerc', 'Leclercq', 'Lecomte', 'Leconte', 'Lecoq', 'Ledoux', 'Leduc', 'Lefebvre',
+        'Lefevre', 'Lefort', 'Legendre', 'Leger', 'Legrand', 'Legros', 'Lejeune', 'Leleu',
+        'Lelievre', 'Lemaire', 'Lemaitre', 'Lemoine', 'Lemonnier', 'Lenoir', 'Leroux', 'Leroy',
+        'Lesage', 'Letellier', 'Leveque', 'Levy', 'Loiseau', 'Lombard', 'Lopes', 'Lopez', 'Louis',
+        'Lucas', 'Mace', 'Mahe', 'Maillard', 'Maillet', 'Maillot', 'Mallet', 'Marchal', 'Marchand',
+        'Marechal', 'Marie', 'Marin', 'Marion', 'Marques', 'Martel', 'Martin', 'Martineau',
+        'Martinez', 'Martins', 'Marty', 'Mary', 'Masse', 'Masson', 'Mathieu', 'Maurice', 'Maury',
+        'Menard', 'Mendes', 'Mercier', 'Merle', 'Meunier', 'Meyer', 'Michaud', 'Michel', 'Millet',
+        'Monnier', 'Moreau', 'Morel', 'Moreno', 'Morin', 'Morvan', 'Moulin', 'Muller', 'Munoz',
+        'Navarro', 'Neveu', 'Nguyen', 'Nicolas', 'Noel', 'Normand', 'Olivier', 'Ollivier', 'Pages',
+        'Parent', 'Paris', 'Pascal', 'Pasquier', 'Paul', 'Payet', 'Pelletier', 'Peltier',
+        'Pereira', 'Perez', 'Peron', 'Perret', 'Perrier', 'Perrin', 'Perrot', 'Petit', 'Petitjean',
+        'Philippe', 'Picard', 'Pichon', 'Pierre', 'Pineau', 'Pinto', 'Pires', 'Poirier', 'Pons',
+        'Potier', 'Pottier', 'Poulain', 'Prevost', 'Pruvost', 'Ramos', 'Raymond', 'Raynaud',
+        'Regnier', 'Remy', 'Renard', 'Renaud', 'Renault', 'Rey', 'Reynaud', 'Ribeiro', 'Richard',
+        'Riou', 'Riviere', 'Robert', 'Robin', 'Roche', 'Rocher', 'Rodrigues', 'Rodriguez', 'Roger',
+        'Rolland', 'Rossi', 'Rousseau', 'Roussel', 'Rousset', 'Roux', 'Roy', 'Royer', 'Ruiz',
+        'Salmon', 'Samson', 'Sanchez', 'Sauvage', 'Schmitt', 'Schneider', 'Seguin', 'Simon',
+        'Tanguy', 'Techer', 'Teixeira', 'Tessier', 'Texier', 'Thibault', 'Thierry', 'Thomas',
+        'Torres', 'Toussaint', 'Traore', 'Turpin', 'Vaillant', 'Valentin', 'Valette', 'Vallee',
+        'Vallet', 'Vasseur', 'Verdier', 'Vidal', 'Vincent', 'Voisin', 'Wagner', 'Weber', 'Weiss',
+    ],
+    'streetTypes' => [
+        'avenue', 'boulevard', 'chemin', 'impasse', 'place', 'rue',
+    ],
+    'cityPrefixes' => [],
+    'citySuffixes' => [
+        '-la-Forêt', '-les-Bains', '-sur-Mer', 'Bourg', 'Ville', 'boeuf', 'dan', 'nec',
+    ],
+    'organizationSuffixes' => [
+        'SA', 'SARL', 'SAS', 'et Fils',
+    ],
+    'streets' => [
+        '{number}, {streetType} {lastName}', '{number}, {streetType} {firstName} {lastName}',
+        '{number}, {streetType} de {lastName}',
+    ],
+    'cities' => [
+        '{lastName}', '{lastName}{citySuffix}', '{lastName}-sur-{lastName}',
+    ],
+    'organizations' => [
+        '{lastName} {organizationSuffix}', '{lastName} {lastName} {organizationSuffix}',
+        '{lastName}',
+    ],
+    'streetNumbers' => [
+        1, 199,
+    ],
+    'postalCode' => '#####',
+];

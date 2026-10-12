@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Shroud;
 
-use Faker\Factory;
 use Shroud\Declaration\Declaration;
 use Shroud\Exception\InvalidConfigurationException;
+use Shroud\Language\English;
 use Shroud\Language\LanguageInterface;
-use Shroud\Language\Plain;
 use Shroud\Platform\Generic;
 use Shroud\Platform\PlatformInterface;
 use Shroud\Schema\Draft;
@@ -24,16 +23,14 @@ use Shroud\Schema\Glossary\GlossaryInterface;
 final readonly class Configuration
 {
     /**
-     * @param string $locale the Faker locale, which picks the lists of names and cities
-     * @param LanguageInterface $language the conventions of the texts of the base
+     * @param LanguageInterface $language the words of the fake identities and the conventions of the texts of the base
      * @param PlatformInterface $platform the platform that owns the base
      * @param list<GlossaryInterface> $glossaries the glossaries of the draft, those of the platform when empty
      */
     public function __construct(
         public Declaration $declaration,
         public string $salt,
-        public string $locale = Factory::DEFAULT_LOCALE,
-        public LanguageInterface $language = new Plain(),
+        public LanguageInterface $language = new English(),
         public PlatformInterface $platform = new Generic(),
         public array $glossaries = [],
     ) {
@@ -66,7 +63,7 @@ final readonly class Configuration
      */
     public function withSalt(string $salt): self
     {
-        return new self($this->declaration, $salt, $this->locale, $this->language, $this->platform, $this->glossaries);
+        return new self($this->declaration, $salt, $this->language, $this->platform, $this->glossaries);
     }
 
     /**
@@ -74,7 +71,7 @@ final readonly class Configuration
      */
     public function generator(bool $renumbering = true): Generator
     {
-        return new Generator($this->salt, $this->locale, $renumbering, $this->language, $this->platform);
+        return new Generator($this->salt, $renumbering, $this->language, $this->platform);
     }
 
     /**

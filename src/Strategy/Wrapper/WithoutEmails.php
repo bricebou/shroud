@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Wrapper;
 
 use Shroud\Context;
+use Shroud\Identity\Gender;
+use Shroud\Identity\Pseudonym;
 use Shroud\Strategy\Observation;
 use Shroud\Strategy\RelayingObserverInterface;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Keep;
+use Shroud\Text\Words;
 
 /**
  * Replaces the email addresses of a text kept as is, or transformed by another strategy.
@@ -42,9 +45,21 @@ final readonly class WithoutEmails implements RelayingObserverInterface
 
         return preg_replace_callback(
             self::EMAIL,
-            static fn (array $match): string => $context->generator->seedFaker('email', mb_strtolower($match[0]))->safeEmail(),
+            static fn (array $match): string => self::fakeAddress($context, mb_strtolower($match[0])),
             $result,
         ) ?? $result;
+    }
+
+    /**
+     * Draws the fake address of a real one: names of the language, a reserved domain.
+     */
+    private static function fakeAddress(Context $context, string $address): string
+    {
+        $draw = $context->generator->draw('email', $address);
+        $vocabulary = $context->generator->language()->vocabulary();
+        $firstName = $vocabulary->firstName($draw->boolean() ? Gender::Female : Gender::Male, $draw);
+
+        return Words::toSlug($firstName) . '.' . Words::toSlug($vocabulary->lastName($draw)) . '@' . $draw->pick(Pseudonym::EMAIL_DOMAINS);
     }
 
     public function observe(mixed $value, Context $context): void

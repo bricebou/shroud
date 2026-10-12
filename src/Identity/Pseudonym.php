@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Shroud\Identity;
 
-use Faker\Generator as Faker;
+use Shroud\Language\Vocabulary;
+use Shroud\Random\Draw;
 use Shroud\Text\Words;
 
 /**
@@ -21,6 +22,13 @@ final readonly class Pseudonym
     private const string FIELD_SEPARATOR = "\x1E";
 
     private const string ITEM_SEPARATOR = "\x1F";
+
+    /**
+     * The domains of the fake emails, reserved for documentation (RFC 2606): no mail reaches anyone.
+     *
+     * @var non-empty-list<string>
+     */
+    public const array EMAIL_DOMAINS = ['example.com', 'example.net', 'example.org'];
 
     /**
      * @param list<string> $firstNames
@@ -42,33 +50,30 @@ final readonly class Pseudonym
     }
 
     /**
-     * Draws a complete pseudonym from a seeded Faker; the suffix, specific to the object, makes its email unique.
+     * Draws a complete pseudonym from the words of a language; the suffix, specific to the object, makes its email unique.
      *
-     * The order of the draws is part of the contract: changing it changes every fixture.
-     * A new field is drawn last; the gender comes first, for the first names follow it.
+     * Each field has a draw of its own: a new field moves none of the others. The first names
+     * follow the gender.
      */
-    public static function draw(Faker $faker, string $suffix): self
+    public static function draw(Vocabulary $vocabulary, Draw $draw, string $suffix): self
     {
-        $gender = $faker->boolean() ? Gender::Female : Gender::Male;
+        $gender = $draw->for('gender')->boolean() ? Gender::Female : Gender::Male;
         $firstNames = [];
         $lastNames = [];
-        // A name with a space ("Da Costa") would replace one word by two: draw again.
+        $firstNameDraw = $draw->for('firstNames');
+        $lastNameDraw = $draw->for('lastNames');
         for ($i = 0; $i < 5; ++$i) {
-            $firstNames[] = self::drawWord(static fn (): string => $faker->firstName($gender->value));
-            $lastNames[] = self::drawWord($faker->lastName(...));
+            $firstNames[] = $vocabulary->firstName($gender, $firstNameDraw);
+            $lastNames[] = $vocabulary->lastName($lastNameDraw);
         }
-        // The words of the company name, then fillers for longer organization names.
-        $organization = $faker->company();
-        $organizationWords = array_values(array_filter(
-            [...Words::extract($organization), ...Words::lorem($faker, 8)],
-            static fn (string $word): bool => $word !== '',
-        ));
+        // The words of the organization name, then fillers for longer organization names.
+        $organizationDraw = $draw->for('organization');
+        $organizationWords = [...Words::extract($vocabulary->organization($organizationDraw)), ...Words::lorem($organizationDraw, 8)];
         // A reserved top-level domain: a fake host must not point at a real site.
-        $domain = Words::toSlug($faker->domainWord()) . '.example';
+        $domain = Words::toSlug($vocabulary->lastName($draw->for('domain'))) . '.example';
         // The suffix tells homonyms apart: two objects drawing the same names keep distinct
         // emails, as a unique key on the column requires.
         $handle = Words::toSlug($firstNames[0]) . '.' . Words::toSlug($lastNames[0]) . '-' . $suffix;
-        $email = $handle . '@' . $faker->safeEmailDomain();
 
         return new self(
             gender: $gender,
@@ -77,10 +82,10 @@ final readonly class Pseudonym
             organizationWords: $organizationWords,
             domain: $domain,
             handle: $handle,
-            email: $email,
-            street: $faker->streetAddress(),
-            postalCode: $faker->postcode(),
-            city: $faker->city(),
+            email: $handle . '@' . $draw->for('email')->pick(self::EMAIL_DOMAINS),
+            street: $vocabulary->street($draw->for('street')),
+            postalCode: $vocabulary->postalCode($draw->for('postalCode')),
+            city: $vocabulary->city($draw->for('city')),
         );
     }
 
@@ -124,20 +129,6 @@ final readonly class Pseudonym
             postalCode: $postalCode,
             city: $city,
         );
-    }
-
-    /**
-     * Draws a one-word first name or last name.
-     *
-     * @param callable(): string $draw
-     */
-    private static function drawWord(callable $draw): string
-    {
-        do {
-            $word = $draw();
-        } while (str_contains($word, ' '));
-
-        return $word;
     }
 
     /**
