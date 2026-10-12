@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# A new push on the same branch or pull request cancels the run it makes useless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: PHP ${{ matrix.php }}
