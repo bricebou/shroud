@@ -3,11 +3,11 @@
 Deterministic, CMS-agnostic pseudonymisation of a relational database: consistent fake
 identities, reversible ids, shape-preserving text replacement, verifiable coverage.
 
-Shroud turns the base of a site into a dump that holds no personal data and still looks and
-behaves like the original: the same person keeps the same fake name and the same fake email in
-every table, the ids are renumbered consistently, the texts keep their shape, the markup of the
-platform survives. The dump imports into an empty base, for development, tests, demonstrations
-or hand-overs.
+Shroud turns the base of a site into a dump without a real name, email or address that still
+looks and behaves like the original: the same person keeps the same fake name and the same fake
+email in every table, the ids are renumbered consistently, the texts keep their shape, the
+markup of the platform survives. The dump imports into an empty base, for development, tests,
+demonstrations or hand-overs.
 
 ## What it does
 
@@ -33,6 +33,25 @@ The core knows no CMS. It handles arrays of rows, a declaration and a generator,
 Faker alone. A platform package brings what belongs to a CMS: its bare declaration, its frozen
 schemas, the markup of its texts, the references it embeds in them, its connection file and its
 column vocabulary. See [Platforms](#platforms).
+
+## Use cases
+
+- **A development base.** Each developer works on a copy of production without its people. The
+  salt is versioned with the project, so the dump is reproducible, and whoever holds the salt
+  can trace a renumbered id back to the real row to reproduce a bug. This is the
+  [pseudonymisation](#pseudonymisation-the-default) regime.
+- **A staging or demonstration site.** The site keeps the volume, the relations and the look of
+  real content, without showing a real name, email or address to a client or an audience.
+- **A base handed to a contractor.** An agency, a freelancer or a hosting provider receives a
+  base to work on. `--random-salt` cuts every link to the original, and the tables of mass data
+  come out empty; whether the result is anonymous remains for the controller to assess, see
+  [towards anonymisation](#towards-anonymisation-with-a-random-salt).
+- **Tests in continuous integration.** The dump is made where the real base lives, then imported
+  by the pipeline as a fixture: with the same salt it comes out the same, byte for byte, and the
+  tests run against realistic data without a real name, email or address.
+- **Tests or jobs against the real base.** When a copy is not an option, the rows are disguised
+  in memory as they are read, and only disguised rows reach the documents, snapshots or logs the
+  code produces. See [On the fly](docs/on-the-fly.md).
 
 ## Two regimes, in the sense of the GDPR
 
