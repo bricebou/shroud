@@ -62,7 +62,7 @@ final class WordStrategiesTest extends StrategyTestCase
         );
     }
 
-    public function testWithoutObservationTheFirstGroupStandsForTheFirstName(): void
+    public function testWithoutObservationTheFirstGroupStandsForTheFirstNameAndASingleGroupForTheLastName(): void
     {
         $pseudonym = new Generator(self::SALT)->pseudonymFor(new Reference('person', 42));
 
@@ -70,7 +70,12 @@ final class WordStrategiesTest extends StrategyTestCase
             ucfirst($pseudonym->firstNames[0]) . '-' . ucfirst($pseudonym->firstNames[1]) . ' ' . ucfirst($pseudonym->lastNames[0]) . ' ' . ucfirst($pseudonym->lastNames[1]),
             self::apply(new FullName(), 'Jean-Pierre Da Costa'),
         );
-        self::assertSame(ucfirst($pseudonym->firstNames[0]), self::apply(new FullName(), 'Dupont'), 'one word: taken for a first name');
+        self::assertSame(ucfirst($pseudonym->lastNames[0]), self::apply(new FullName(), 'Dupont'), 'one word: taken for a last name');
+        self::assertSame(
+            ucfirst($pseudonym->lastNames[0]) . '-' . ucfirst($pseudonym->lastNames[1]),
+            self::apply(new FullName(), 'Lefebvre-Martin'),
+            'one group: taken for a last name',
+        );
     }
 
     public function testTheObservationIgnoresWhatIsNotAString(): void
@@ -149,5 +154,20 @@ final class WordStrategiesTest extends StrategyTestCase
 
         self::assertSame(1, $generator->recall(new Reference('person', 42), LastName::WORD_COUNT));
         self::assertSame(ucfirst($pseudonym->lastNames[0]), self::apply(new FullName(), 'Dupont', $context));
+    }
+
+    /**
+     * A last name alone observed, of as many words as the full name: the person has no first name.
+     */
+    public function testALastNameAloneThatAccountsForTheValueIsFollowed(): void
+    {
+        $generator = new Generator(self::SALT);
+        $pseudonym = $generator->pseudonymFor(new Reference('person', 42));
+        $context = self::context($generator);
+
+        new LastName()->observe('Da Costa', $context);
+
+        self::assertNull($generator->recall(new Reference('person', 42), FirstName::WORD_COUNT));
+        self::assertSame(ucfirst($pseudonym->lastNames[0]) . ' ' . ucfirst($pseudonym->lastNames[1]), self::apply(new FullName(), 'Da Costa', $context));
     }
 }
