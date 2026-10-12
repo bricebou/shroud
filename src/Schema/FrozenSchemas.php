@@ -11,13 +11,20 @@ use Shroud\Exception\InvalidSchemaException;
  *
  * A file exists only for a version whose schema differs from the previous one: the version of
  * a site therefore resolves to the file of the nearest version below. The files are named
- * `<prefix>-<version>.json`.
+ * `<prefix>-<version>.json`. A site whose tables carry another prefix than the frozen ones reads
+ * them renamed: `spip_auteurs` frozen, `site_auteurs` loaded.
  */
 final readonly class FrozenSchemas
 {
+    /**
+     * @param string $frozenTablePrefix the prefix of the table names in the frozen files
+     * @param string $tablePrefix the prefix of the table names of the site, which replaces it when loading
+     */
     public function __construct(
         private string $directory,
         private string $prefix,
+        private string $frozenTablePrefix = '',
+        private string $tablePrefix = '',
     ) {
     }
 
@@ -70,7 +77,9 @@ final readonly class FrozenSchemas
      */
     public function load(string $version): Schema
     {
-        return Schema::fromJsonFile($this->path($version));
+        $schema = Schema::fromJsonFile($this->path($version));
+
+        return $this->frozenTablePrefix === $this->tablePrefix ? $schema : $schema->withTablePrefix($this->frozenTablePrefix, $this->tablePrefix);
     }
 
     /**

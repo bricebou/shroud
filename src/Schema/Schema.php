@@ -111,6 +111,22 @@ final readonly class Schema
     }
 
     /**
+     * Returns the schema with the prefix of its table names replaced, `spip_` by `site_` for instance.
+     *
+     * A table whose name does not start with the prefix keeps it.
+     */
+    public function withTablePrefix(string $from, string $to): self
+    {
+        $tables = [];
+        foreach ($this->tables as $name => $table) {
+            $renamed = str_starts_with($name, $from) ? $to . substr($name, strlen($from)) : $name;
+            $tables[] = new TableSchema($renamed, $table->primaryKey, $table->columns);
+        }
+
+        return new self($tables);
+    }
+
+    /**
      * Lists the tables, in alphabetical order.
      *
      * @return list<TableSchema>

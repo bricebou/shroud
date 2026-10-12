@@ -66,4 +66,12 @@ final class FrozenSchemasTest extends TestCase
         $this->expectException(InvalidSchemaException::class);
         $none->nearest('1.0.0');
     }
+
+    public function testASiteWithAnotherTablePrefixReadsTheFrozenSchemaRenamed(): void
+    {
+        $frozen = new FrozenSchemas(__DIR__ . '/../../fixtures/schema', 'test', 'peo', 'pal');
+
+        self::assertSame(['contacts', 'palple'], array_map(static fn (\Shroud\Schema\TableSchema $table): string => $table->name, $frozen->load('2.0.0')->tables()));
+        self::assertSame(['contacts', 'people'], array_map(static fn (\Shroud\Schema\TableSchema $table): string => $table->name, new FrozenSchemas(__DIR__ . '/../../fixtures/schema', 'test', 'peo', 'peo')->load('2.0.0')->tables()));
+    }
 }
