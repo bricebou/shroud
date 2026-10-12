@@ -16,7 +16,8 @@ final class Renumber
     /**
      * Returns the id permuted for this type; NULL, the empty string, zero and the negatives pass through.
      *
-     * An id beyond `Permutation::MAX` is refused: it cannot be permuted reversibly.
+     * An id beyond `Permutation::MAX` is refused: it cannot be permuted reversibly. A string id
+     * written with leading zeros, `'0042'`, keeps its width; a longer permuted id cannot.
      */
     public static function value(mixed $value, string $type, Context $context): mixed
     {
@@ -39,7 +40,9 @@ final class Renumber
             throw self::beyond($context);
         }
 
-        return (string) $context->generator->permutationFor($type)->apply(self::inDomain((int) $digits, $context));
+        $permuted = (string) $context->generator->permutationFor($type)->apply(self::inDomain((int) $digits, $context));
+
+        return $value[0] === '0' ? str_pad($permuted, strlen($value), '0', STR_PAD_LEFT) : $permuted;
     }
 
     /**

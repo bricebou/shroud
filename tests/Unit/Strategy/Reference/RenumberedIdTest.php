@@ -60,7 +60,16 @@ final class RenumberedIdTest extends StrategyTestCase
         self::assertIsInt($max);
         self::assertLessThanOrEqual(Permutation::MAX, $max);
         self::assertSame(self::apply(new RenumberedId('author'), (string) Permutation::MAX), (string) $max);
-        self::assertSame(self::apply(new RenumberedId('author'), '0042'), self::apply(new RenumberedId('author'), '42'), 'leading zeros are read');
+    }
+
+    public function testAnIdWrittenWithLeadingZerosKeepsItsWidth(): void
+    {
+        $generator = new Generator(self::SALT);
+        $author = (string) $generator->permutationFor('author')->apply(42);
+
+        self::assertSame(str_pad($author, 12, '0', STR_PAD_LEFT), self::apply(new RenumberedId('author'), '000000000042', self::context($generator)));
+        self::assertSame($author, self::apply(new RenumberedId('author'), '042', self::context($generator)), 'a longer permuted id keeps its digits');
+        self::assertSame('000', self::apply(new RenumberedId('author'), '000'));
     }
 
     public function testAnIdBeyondTheDomainIsRefused(): void
