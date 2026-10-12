@@ -16,8 +16,9 @@ use Shroud\Exception\UndeclaredTableException;
  *
  * Each declared table comes out with its schema, taken from `SHOW CREATE TABLE`, then its rows
  * transformed by batches of inserts; a truncated table comes out with its schema alone. A table
- * of the base absent from the declaration stops everything: nothing passes by default. The
- * tables that observe the batch are read a first time, whole, before anything is written.
+ * of the base absent from the declaration stops everything: nothing passes by default; a declared
+ * table absent from the base is skipped, as the coverage allows. The tables that observe the
+ * batch are read a first time, whole, before anything is written.
  */
 final readonly class MysqlDump
 {
@@ -38,11 +39,12 @@ final readonly class MysqlDump
      */
     public function write($output, ?callable $progress = null): void
     {
-        $this->refuseUndeclaredTables();
-        $this->observe();
+        $present = $this->tableNames();
+        $this->refuseUndeclaredTables($present);
+        $this->observe($present);
 
         fwrite($output, "SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS = 0;\nSET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';\n\n");
-        foreach ($this->declaration->tables() as $table) {
+        foreach ($this->presentTables($present) as $table) {
             $count = $this->writeTable($output, $table);
             if ($progress !== null) {
                 $progress($table->name, $count);
@@ -59,14 +61,15 @@ final readonly class MysqlDump
     public function dryRun(?callable $progress = null): DryRun
     {
         $dryRun = new DryRun();
-        foreach ($this->tableNames() as $name) {
+        $present = $this->tableNames();
+        foreach ($present as $name) {
             if (! $this->declaration->has($name)) {
                 $dryRun->noteUndeclaredTable($name);
             }
         }
-        $this->observe();
+        $this->observe($present);
 
-        foreach ($this->declaration->tables() as $table) {
+        foreach ($this->presentTables($present) as $table) {
             if ($table->truncated) {
                 continue;
             }
@@ -85,11 +88,25 @@ final readonly class MysqlDump
     }
 
     /**
-     * Reads once, whole, every table that observes the batch.
+     * Lists the declared tables that the base carries, in declaration order.
+     *
+     * @param list<string> $present the tables of the base
+     *
+     * @return list<Table>
      */
-    private function observe(): void
+    private function presentTables(array $present): array
     {
-        foreach ($this->declaration->tables() as $table) {
+        return array_values(array_filter($this->declaration->tables(), static fn (Table $table): bool => in_array($table->name, $present, strict: true)));
+    }
+
+    /**
+     * Reads once, whole, every table of the base that observes the batch.
+     *
+     * @param list<string> $present the tables of the base
+     */
+    private function observe(array $present): void
+    {
+        foreach ($this->presentTables($present) as $table) {
             if ($table->hasObservers() && ! $table->truncated) {
                 foreach ($this->rows($table) as $row) {
                     $this->disguiser->observeRow($table->name, $row);
@@ -165,10 +182,12 @@ final readonly class MysqlDump
 
     /**
      * Refuses any table of the base that the declaration does not know: nothing passes by default.
+     *
+     * @param list<string> $present the tables of the base
      */
-    private function refuseUndeclaredTables(): void
+    private function refuseUndeclaredTables(array $present): void
     {
-        foreach ($this->tableNames() as $name) {
+        foreach ($present as $name) {
             if (! $this->declaration->has($name)) {
                 throw new UndeclaredTableException($name);
             }
