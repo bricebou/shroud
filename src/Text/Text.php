@@ -82,7 +82,8 @@ final readonly class Text
             }
             // Separator or markup: as is. Only a piece made of letters is a word.
             if (preg_match('/^\p{L}+$/u', $part) !== 1) {
-                $result .= $part;
+                // The zero-width joiners of a script bind the parts of a compound: a hyphen keeps it visible between Latin words.
+                $result .= str_replace(["\u{200C}", "\u{200D}"], '-', $part);
                 continue;
             }
             $result .= $this->shapeLike($part, $word($rank++));
@@ -141,6 +142,10 @@ final readonly class Text
     private function shapeLike(string $original, string $replacement): string
     {
         $word = mb_strtolower($replacement);
+        // A word of a caseless script, Arabic, Hebrew, Chinese, says nothing of case: the replacement takes a capital.
+        if (mb_strtoupper($original) === mb_strtolower($original)) {
+            return mb_strtoupper(mb_substr($word, 0, 1)) . mb_substr($word, 1);
+        }
         $initial = mb_substr($original, 0, 1);
         if (mb_strlen($original) > 1 && mb_strtoupper($original) === $original) {
             $word = mb_strtoupper($word);

@@ -94,6 +94,15 @@ final class TextTest extends TestCase
         self::assertSame('alpha {{x}}', $generator->text()->replaceWords("l'un {{x}}", static fn (): string => 'alpha'));
     }
 
+    public function testAWordOfACaselessScriptTakesACapitalAndNoDiacritic(): void
+    {
+        $words = ['alpha', 'beta', 'gamma'];
+
+        self::assertSame('Alpha Beta-Gamma', $this->french()->replaceWords("زها علی\u{200C}آبادی", static fn (int $rank): string => $words[$rank]), 'the joiner of the compound becomes a hyphen');
+        self::assertSame('Alpha', $this->french()->replaceWords('北京', static fn (): string => 'alpha'));
+        self::assertSame('Àlpha BETA', $this->french()->replaceWords('Zoé DUPONT', static fn (int $rank): string => $words[$rank]), 'a cased script keeps its rules');
+    }
+
     private function french(): Text
     {
         return new Text(new TestPlatform(), new French());
