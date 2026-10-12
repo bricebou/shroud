@@ -114,16 +114,24 @@ the forty orders. Hence, "towards": the tool brings a base as close to anonymous
 value-level transformation can, and the assessment of the residual risk belongs to the
 controller, dataset by dataset.
 
+## Prerequisites
+
+- **PHP 8.4** or later, with the `intl`, `mbstring` and `pdo` extensions, and `pdo_mysql` for
+  the commands. Disguising rows [on the fly](docs/on-the-fly.md) needs no connection of its own.
+- **A MySQL or MariaDB base.** The commands read the schema from `information_schema` and write
+  a dump in the dialect of MySQL: no other database is supported. The trials ran on MariaDB 10.11
+  and 11.8.
+- **Read access to the base**, from the machine that runs the commands.
+
 ## Installation
 
 ```sh
 composer require --dev momh/shroud
 ```
 
-Shroud requires PHP 8.4 or later, with the `intl`, `mbstring` and `pdo` extensions. The commands
-`shroud-dump`, `shroud-diff` and `shroud-baseline` land in `vendor/bin/`, and the project
-versions at its root a `shroud.php` file, its declaration, its salt and its platform, of which
-[`docs/examples/shroud.php`](docs/examples/shroud.php) gives the model.
+The commands `shroud-dump`, `shroud-diff` and `shroud-baseline` land in `vendor/bin/`, and the
+project versions at its root a `shroud.php` file, its declaration, its salt and its platform, of
+which [`docs/examples/shroud.php`](docs/examples/shroud.php) gives the model.
 
 ```sh
 vendor/bin/shroud-diff --host=db --database=site --user=site   # what the declaration misses
