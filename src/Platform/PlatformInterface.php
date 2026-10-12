@@ -29,8 +29,8 @@ interface PlatformInterface
      * Lists the markup of the platform's texts to leave untouched, besides HTML tags and entities.
      *
      * Each entry is a regular expression fragment without delimiters, compiled with the `u`
-     * modifier: the language markers of a multilingual block, the link shortcuts of a wiki
-     * syntax, the tags of a template language.
+     * modifier: the language markers `[en]` of a SPIP `<multi>` block and its link shortcuts
+     * `[->art12]`, the WordPress shortcodes `[gallery ids="12,15"]`, the tags of a template language.
      *
      * @return list<string>
      */
@@ -39,8 +39,9 @@ interface PlatformInterface
     /**
      * Renumbers the object references that the platform embeds in a text, following the renumbered ids.
      *
-     * A link shortcut to the author 12, on a platform whose authors are renumbered, takes the new
-     * number of that author. The text comes back unchanged when the platform embeds no reference.
+     * A SPIP link shortcut `[->aut12]`, a WordPress block `<!-- wp:image {"id":12} -->` or shortcode
+     * `[gallery ids="12,15"]`: each id takes the new number of its object when the declaration renumbers
+     * its type. The text comes back unchanged when the platform embeds no reference.
      */
     public function renumberReferences(string $text, Context $context): string;
 

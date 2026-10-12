@@ -69,7 +69,7 @@ final readonly class Draft
     /**
      * The strategies that draw no pseudonym: a table made of them only needs no reference.
      */
-    private const array IMPERSONAL = ['Keep', 'Clear', 'Constant', 'ShapedText', 'ShapedDigits', 'ShiftedDate', 'RenumberedId', 'RenumberedPolymorphicId'];
+    private const array IMPERSONAL = ['Keep', 'Clear', 'Constant', 'ShapedText', 'ShapedDigits', 'ShiftedDate', 'RenumberedId', 'RenumberedPolymorphicId', 'EmbeddedReferences'];
 
     /**
      * @var list<GlossaryInterface>
