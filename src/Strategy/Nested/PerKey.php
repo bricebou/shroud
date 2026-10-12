@@ -6,13 +6,14 @@ namespace Shroud\Strategy\Nested;
 
 use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
-use Shroud\Strategy\CompositeInterface;
+use Shroud\Strategy\Observation;
+use Shroud\Strategy\RelayingObserverInterface;
 use Shroud\Strategy\StrategyInterface;
 
 /**
  * Transforms an array key by key: each declared key with its strategy, the others with a common one.
  */
-final readonly class PerKey implements CompositeInterface
+final readonly class PerKey implements RelayingObserverInterface
 {
     /**
      * @param array<int|string, StrategyInterface> $keys
@@ -41,6 +42,19 @@ final readonly class PerKey implements CompositeInterface
         }
 
         return $result;
+    }
+
+    /**
+     * Relays the observation of each item to the strategy of its key; a value that is not an array is not observed.
+     */
+    public function observe(mixed $value, Context $context): void
+    {
+        if (! is_array($value)) {
+            return;
+        }
+        foreach ($value as $key => $item) {
+            Observation::relay($this->keys[$key] ?? $this->others, $item, $context);
+        }
     }
 
     public function innerStrategies(): iterable

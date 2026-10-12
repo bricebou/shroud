@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Shroud\Declaration;
 
 use Shroud\Exception\UndeclaredColumnException;
-use Shroud\Strategy\ObserverInterface;
+use Shroud\Strategy\Observation;
 use Shroud\Strategy\StrategyInterface;
 
 /**
@@ -21,6 +21,13 @@ final readonly class Table
     public array $primaryKey;
 
     /**
+     * The columns whose strategy observes the batch, at any depth, computed once.
+     *
+     * @var list<string>
+     */
+    private array $observing;
+
+    /**
      * @param string|list<string> $primaryKey
      * @param array<string, StrategyInterface> $columns
      * @param ?ReferenceColumns $reference where a row references its object, when it does
@@ -34,6 +41,7 @@ final readonly class Table
         public bool $truncated = false,
     ) {
         $this->primaryKey = is_string($primaryKey) ? [$primaryKey] : $primaryKey;
+        $this->observing = array_keys(array_filter($columns, Observation::observes(...)));
     }
 
     /**
@@ -74,11 +82,21 @@ final readonly class Table
     }
 
     /**
-     * Tells whether a column of the table observes the batch before its transformation.
+     * Tells whether a column of the table observes the batch before its transformation, at any depth of its strategy.
      */
     public function hasObservers(): bool
     {
-        return array_any($this->columns, fn ($strategy) => $strategy instanceof ObserverInterface);
+        return $this->observingColumns() !== [];
+    }
+
+    /**
+     * Lists the columns whose strategy observes the batch, at any depth.
+     *
+     * @return list<string>
+     */
+    public function observingColumns(): array
+    {
+        return $this->observing;
     }
 
     /**

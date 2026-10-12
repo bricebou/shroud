@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Nested;
 
 use Shroud\Context;
-use Shroud\Strategy\CompositeInterface;
+use Shroud\Strategy\Observation;
+use Shroud\Strategy\RelayingObserverInterface;
 use Shroud\Strategy\StrategyInterface;
 
 /**
  * Picks the strategy according to the value of another column of the row: the value of a setting
  * according to its name, the content of a field according to its type.
  */
-final readonly class ByColumn implements CompositeInterface
+final readonly class ByColumn implements RelayingObserverInterface
 {
     /**
      * @param array<int|string, StrategyInterface> $cases
@@ -29,11 +30,26 @@ final readonly class ByColumn implements CompositeInterface
      */
     public function apply(mixed $value, Context $context): mixed
     {
+        return $this->strategyFor($context)->apply($value, $context);
+    }
+
+    /**
+     * Relays the observation to the strategy that the discriminating column designates.
+     */
+    public function observe(mixed $value, Context $context): void
+    {
+        Observation::relay($this->strategyFor($context), $value, $context);
+    }
+
+    /**
+     * Returns the strategy that the value of the discriminating column designates, or the default one.
+     */
+    private function strategyFor(Context $context): StrategyInterface
+    {
         // PHP array keys mix up '18' and 18: the value of the column, string or integer, finds its case.
         $discriminant = $context->row[$this->column] ?? null;
-        $strategy = is_scalar($discriminant) ? ($this->cases[(string) $discriminant] ?? $this->default) : $this->default;
 
-        return $strategy->apply($value, $context);
+        return is_scalar($discriminant) ? ($this->cases[(string) $discriminant] ?? $this->default) : $this->default;
     }
 
     public function innerStrategies(): iterable

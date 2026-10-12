@@ -7,7 +7,7 @@ namespace Shroud;
 use Shroud\Declaration\Declaration;
 use Shroud\Exception\ShroudException;
 use Shroud\Exception\TruncatedTableException;
-use Shroud\Strategy\ObserverInterface;
+use Shroud\Strategy\Observation;
 
 /**
  * Transforms rows: rows come in, disguised rows come out.
@@ -94,16 +94,17 @@ final readonly class Disguiser
     public function observeRow(string $tableName, array $row): void
     {
         $table = $this->declaration->getTable($tableName);
-        if ($table->truncated || ! $table->hasObservers()) {
+        $observing = $table->truncated ? [] : $table->observingColumns();
+        if ($observing === []) {
             return;
         }
         $key = $table->computeKey($row);
         $reference = $table->reference?->resolveIn($row, $this->generator);
 
-        foreach ($row as $column => $value) {
-            $strategy = $table->getStrategyFor($column);
-            if ($strategy instanceof ObserverInterface) {
-                $strategy->observe($value, new Context($table->name, $column, $key, $row, $reference, $this->generator, $this->declaration));
+        foreach ($observing as $column) {
+            if (array_key_exists($column, $row)) {
+                $strategy = $table->getStrategyFor($column);
+                Observation::relay($strategy, $row[$column], new Context($table->name, $column, $key, $row, $reference, $this->generator, $this->declaration));
             }
         }
     }

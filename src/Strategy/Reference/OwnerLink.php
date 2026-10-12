@@ -8,6 +8,7 @@ use Shroud\Context;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Identity\Reference;
 use Shroud\Strategy\CompositeInterface;
+use Shroud\Strategy\Observation;
 use Shroud\Strategy\ObserverInterface;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Keep;
@@ -35,7 +36,7 @@ final readonly class OwnerLink implements ObserverInterface, CompositeInterface
     }
 
     /**
-     * Notes the owner of the object of the row, when both are named and differ.
+     * Notes the owner of the object of the row, when both are named and differ, then lets the wrapped strategy observe.
      */
     public function observe(mixed $value, Context $context): void
     {
@@ -44,6 +45,7 @@ final readonly class OwnerLink implements ObserverInterface, CompositeInterface
         if ($owned instanceof Reference && $owner instanceof Reference && $owned->toKey() !== $owner->toKey()) {
             $context->generator->remember($owned, ReferenceColumns::OWNER, $owner);
         }
+        Observation::relay($this->inner, $value, $context);
     }
 
     /**
