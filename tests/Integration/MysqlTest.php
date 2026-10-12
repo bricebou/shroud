@@ -189,7 +189,7 @@ final class MysqlTest extends TestCase
 
         return new \PDO($dsn . ';dbname=' . $base . ';charset=utf8mb4', is_string($user) ? $user : 'root', is_string($password) ? $password : '', [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => $buffered,
+            \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => $buffered,
         ]);
     }
 

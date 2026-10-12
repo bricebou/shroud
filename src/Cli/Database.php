@@ -75,7 +75,7 @@ final readonly class Database
 
         return new \PDO($this->dsn, $this->user, $password, [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+            \Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false,
         ]);
     }
 
