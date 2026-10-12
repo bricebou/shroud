@@ -13,7 +13,7 @@ the order they apply:
 | An elision of the language before a word: `d'Aubigné`, `qu'importe` | Nothing: it disappears with its apostrophe |
 | Blanks, non-breaking spaces, punctuation, hyphens | Unchanged, in place |
 | HTML tags and entities, the markup of the platform | Unchanged; a reference embedded by the platform follows the renumbering of its object |
-| A `+` and up to three digits at the head of a phone number | Unchanged, the rest of the digits replaced |
+| A `+` and up to three digits at the head of a phone number | Unchanged, the rest of the digits replaced; `Phone` keeps the `0` of a national number too, and lays the digits of the pseudonym from the last, so that a number written two ways stays one |
 | The host of a URL | Kept, or replaced by the fake domain of the pseudonym, as the declaration chooses; the path is rewritten, query and fragment dropped |
 | A URL declared unique | Its last segment takes ten characters drawn from the original, so that two alike pseudonyms do not collide on a primary key |
 | An email address in a kept text, when the declaration asks for it | A fake address on a reserved domain, the same for the same address in the whole base, case ignored |

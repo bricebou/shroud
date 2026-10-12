@@ -35,7 +35,7 @@ final class French implements GlossaryInterface
             new DraftRule('/^(nom|nom_complet|auteur|signataire)$|_nom$/', 'new FullName()', review: true),
             new DraftRule('/^(identifiant|pseudo|pseudonyme)$/', 'new Login()', review: true),
             new DraftRule('/(^|_)(lien|site_web|adresse_site|page_web)(_|$)/', 'new Url(keepHost: false)', review: true),
-            new DraftRule('/^(tel|telephone|portable|gsm|fax)(_?\d)?$|_(tel|telephone|portable|gsm|fax)$/', 'new ShapedDigits(keepDiallingCode: true)'),
+            new DraftRule('/^(tel|telephone|portable|gsm|fax)(_?\d)?$|_(tel|telephone|portable|gsm|fax)$/', 'new Phone()'),
             new DraftRule('/(^|_)(adresse|rue|voie)(_?\d)?$/', 'new Street()'),
             new DraftRule('/(^|_)(code_postal|codepostal|cp)$/', 'new PostalCode()'),
             new DraftRule('/(^|_)(ville|commune|localite)$/', 'new City()'),

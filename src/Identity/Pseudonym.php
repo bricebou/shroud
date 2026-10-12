@@ -46,6 +46,7 @@ final readonly class Pseudonym
         public string $street,
         public string $postalCode,
         public string $city,
+        public string $phoneDigits,
     ) {
     }
 
@@ -86,6 +87,8 @@ final readonly class Pseudonym
             street: $vocabulary->street($draw->for('street')),
             postalCode: $vocabulary->postalCode($draw->for('postalCode')),
             city: $vocabulary->city($draw->for('city')),
+            // Enough digits for any number: E.164 counts fifteen at most.
+            phoneDigits: $draw->for('phone')->numerify(str_repeat('#', 15)),
         );
     }
 
@@ -107,6 +110,7 @@ final readonly class Pseudonym
             $this->street,
             $this->postalCode,
             $this->city,
+            $this->phoneDigits,
         ]);
     }
 
@@ -115,7 +119,7 @@ final readonly class Pseudonym
      */
     public static function unpack(string $packed): self
     {
-        [$gender, $firstNames, $lastNames, $organizationWords, $domain, $handle, $email, $street, $postalCode, $city] = explode(self::FIELD_SEPARATOR, $packed);
+        [$gender, $firstNames, $lastNames, $organizationWords, $domain, $handle, $email, $street, $postalCode, $city, $phoneDigits] = explode(self::FIELD_SEPARATOR, $packed);
 
         return new self(
             gender: Gender::from($gender),
@@ -128,6 +132,7 @@ final readonly class Pseudonym
             street: $street,
             postalCode: $postalCode,
             city: $city,
+            phoneDigits: $phoneDigits,
         );
     }
 

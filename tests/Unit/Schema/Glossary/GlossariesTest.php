@@ -22,7 +22,7 @@ final class GlossariesTest extends TestCase
         yield 'english email' => [new English(), 'contact_email', 'new Email()'];
         yield 'english first name' => [new English(), 'firstName', 'new FirstName()'];
         yield 'english birth' => [new English(), 'date_of_birth', 'new ShiftedDate()'];
-        yield 'english phone' => [new English(), 'mobile_phone', 'new ShapedDigits(keepDiallingCode: true)'];
+        yield 'english phone' => [new English(), 'mobile_phone', 'new Phone()'];
         yield 'french courriel' => [new French(), 'courriel', 'new Email()'];
         yield 'french prenom' => [new French(), 'prenom', 'new FirstName()'];
         yield 'french ville' => [new French(), 'ville', 'new City()'];

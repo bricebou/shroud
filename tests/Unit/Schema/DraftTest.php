@@ -29,7 +29,7 @@ final class DraftTest extends TestCase
         'first_name' => new FirstName(),
         'nom' => new FullName(), // @todo review
         'email' => new Email(),
-        'phone' => new ShapedDigits(keepDiallingCode: true),
+        'phone' => new Phone(),
         'address' => new Street(),
         'postal_code' => new PostalCode(),
         'city' => new City(),

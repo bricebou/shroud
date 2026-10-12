@@ -13,8 +13,8 @@ what they need:
   or digits while keeping their shape, shift a date.
 - `Pseudonym`: the strategy draws from the **pseudonym** of the referenced object, the complete
   fake identity drawn once for it: a gender and first names of that gender, last names,
-  organization words, email, handle, street, postal code, city. A civility follows the drawn
-  gender, never the real one. A row without reference is refused.
+  organization words, email, handle, street, postal code, city, the digits of a phone number.
+  A civility follows the drawn gender, never the real one. A row without reference is refused.
 - `Reference`: the strategy renumbers an id. `RenumberedId('person')` on any column that carries
   the id of a person, primary or foreign key, declares persons renumbered everywhere;
   `RenumberedPolymorphicId('object_type')` on the id of a polymorphic link reads the type from

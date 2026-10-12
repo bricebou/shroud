@@ -20,6 +20,7 @@ use Shroud\Strategy\Pseudonym\FullName;
 use Shroud\Strategy\Pseudonym\LastName;
 use Shroud\Strategy\Pseudonym\Login;
 use Shroud\Strategy\Pseudonym\Organization;
+use Shroud\Strategy\Pseudonym\Phone;
 use Shroud\Strategy\Pseudonym\PostalCode;
 use Shroud\Strategy\Pseudonym\Street;
 use Shroud\Strategy\Pseudonym\Url;
@@ -63,6 +64,7 @@ final readonly class Draft
         'LastName' => LastName::class,
         'Login' => Login::class,
         'Organization' => Organization::class,
+        'Phone' => Phone::class,
         'PostalCode' => PostalCode::class,
         'Street' => Street::class,
         'Url' => Url::class,

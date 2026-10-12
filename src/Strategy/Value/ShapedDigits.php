@@ -17,6 +17,11 @@ use Shroud\Strategy\AbstractTextStrategy;
  */
 final class ShapedDigits extends AbstractTextStrategy
 {
+    /**
+     * An international dialling code: a `+` followed by one to three digits.
+     */
+    public const string DIALLING_CODE = '\+\d{1,3}';
+
     public function __construct(
         private readonly bool $keepDiallingCode = false,
     ) {
@@ -29,9 +34,8 @@ final class ShapedDigits extends AbstractTextStrategy
             throw new InvalidValueException($context->table, $context->column, $letters === 1 ? 'letters found' : 'invalid UTF-8');
         }
 
-        // An international dialling code: a `+` followed by one to three digits.
         $start = 0;
-        if ($this->keepDiallingCode && preg_match('/^\+\d{1,3}/', $value, $diallingCode) === 1) {
+        if ($this->keepDiallingCode && preg_match('/^' . self::DIALLING_CODE . '/', $value, $diallingCode) === 1) {
             $start = strlen($diallingCode[0]);
         }
 

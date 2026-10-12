@@ -45,7 +45,7 @@ final class English implements GlossaryInterface
             new DraftRule('/^(login|username|user_?name|nickname|nicename|handle)$|_(login|username|nickname|nicename)$/', 'new Login()'),
             new DraftRule('/^(site_?name|site)$/', 'new ShapedText()'),
             new DraftRule('/^(url|link|href|website|web_?site|homepage|referer|referrer)$|_(url|link|href|website|homepage)$/', 'new Url(keepHost: false)', review: true),
-            new DraftRule('/^(tel|telephone|phone|fax|mobile|cell)(_?\d)?$|_(tel|telephone|phone|fax|mobile)$/', 'new ShapedDigits(keepDiallingCode: true)'),
+            new DraftRule('/^(tel|telephone|phone|fax|mobile|cell)(_?\d)?$|_(tel|telephone|phone|fax|mobile)$/', 'new Phone()'),
             new DraftRule('/(^|_)(address|street)(_?\d|_line_?\d)?$/', 'new Street()'),
             new DraftRule('/(^|_)(postal_?code|post_?code|zip|zip_?code)$/', 'new PostalCode()'),
             new DraftRule('/(^|_)(city|town|locality)$/', 'new City()'),

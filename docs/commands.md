@@ -182,10 +182,10 @@ use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
 use Shroud\Strategy\Pseudonym\Organization;
+use Shroud\Strategy\Pseudonym\Phone;
 use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Keep;
-use Shroud\Strategy\Value\ShapedDigits;
 
 return static fn (Declaration $declaration): Declaration => $declaration->with(
     new Table('contacts', 'id_contact', [
@@ -194,7 +194,7 @@ return static fn (Declaration $declaration): Declaration => $declaration->with(
         'first_name' => new FirstName(),
         'name' => new FullName(), // @todo review
         'email' => new Email(),
-        'phone' => new ShapedDigits(keepDiallingCode: true),
+        'phone' => new Phone(),
         'updated_at' => new Keep(),
     ], ReferenceColumns::fromFixedType('contact', 'id_contact')),
     $declaration->getTable('people')->withColumns([
@@ -238,7 +238,7 @@ then from the glossaries, then from its SQL type:
 | `email`, `first_name`, `last_name`, `login` | `Email`, `FirstName`, `LastName`, `Login` |
 | `civility`, `salutation`, `civilite` | `Civility` |
 | `name`, `author`, `signature`, `nom`, `from_name` | `FullName`, to review: a person or a title? |
-| `phone`, `fax`, `mobile`, `telephone` | `ShapedDigits` keeping the dialling code |
+| `phone`, `fax`, `mobile`, `telephone` | `Phone`: the digits of the pseudonym, the dialling code kept |
 | `address`, `postal_code`, `city`, `adresse`, `code_postal`, `ville` | `Street`, `PostalCode`, `City` |
 | `company`, `organization`, `institution`, `societe` | `Organization` |
 | `url`, `link`, `website`, `lien` | `Url` without the host, to review |

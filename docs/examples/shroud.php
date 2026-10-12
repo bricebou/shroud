@@ -22,11 +22,11 @@ use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
 use Shroud\Strategy\Pseudonym\LastName;
+use Shroud\Strategy\Pseudonym\Phone;
 use Shroud\Strategy\Reference\OwnerLink;
 use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Keep;
-use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Value\ShapedText;
 use Shroud\Strategy\Value\ShiftedDate;
 use Shroud\Strategy\Wrapper\Fallback;
@@ -56,7 +56,7 @@ $declaration = new Declaration([
         'first_name' => new FirstName(),
         'last_name' => new LastName(),
         // An old base carries letters in some phone numbers: those are cleared.
-        'phone' => new Fallback(new ShapedDigits(keepDiallingCode: true), new Clear()),
+        'phone' => new Fallback(new Phone(), new Clear()),
     ], ReferenceColumns::fromFixedType('person', 'id_person')->withFallback(ReferenceColumns::fromFixedType('contact', 'id_contact'))),
     Table::truncated('visits'),
     Table::truncated('search_log'),
