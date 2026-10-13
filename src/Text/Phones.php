@@ -104,7 +104,9 @@ final class Phones
         if (preg_match('/\p{L}-$/u', $before) === 1 || preg_match('/^-\p{L}/u', $after) === 1 || preg_match('/[A-Za-z-]+\(\s*$/', $before) === 1) {
             return false;
         }
-        if (preg_match(self::DATE, $number) === 1 || self::isDateWithBlanks($number) || preg_match('/^(19|20)\d\d-(19|20)\d\d$/', $number) === 1) {
+        // A date never opens on a dialling code: in "+33-1-2345-6789", "33-1-2345" is no date.
+        $dialled = str_starts_with($number, '+') || str_starts_with($number, '(+');
+        if ((! $dialled && preg_match(self::DATE, $number) === 1) || self::isDateWithBlanks($number) || preg_match('/^(19|20)\d\d-(19|20)\d\d$/', $number) === 1) {
             return false;
         }
 

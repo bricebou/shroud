@@ -30,6 +30,7 @@ final class PhonesTest extends TestCase
         yield 'national toll-free' => ['0 800 123 456'];
         yield 'british' => ['+44 20 7946 0958'];
         yield 'dialling code in parentheses' => ['(+33) 6 12 34 56 78'];
+        yield 'hyphens, after a dialling code' => ['+33-1-2345-6789'];
     }
 
     /**
@@ -41,6 +42,7 @@ final class PhonesTest extends TestCase
         yield 'glued digits, an id' => ['1234567890'];
         yield 'iso date' => ['2026-01-01 12'];
         yield 'french date' => ['12.03.2026'];
+        yield 'date and time' => ['12-03-2026 14'];
         yield 'date with blanks' => ['12 03 2026'];
         yield 'range of years' => ['2019-2020'];
         yield 'amount' => ['12 345 678'];
