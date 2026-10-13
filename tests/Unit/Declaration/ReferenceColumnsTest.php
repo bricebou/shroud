@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace Shroud\Tests\Unit\Declaration;
 
 use PHPUnit\Framework\TestCase;
+use Shroud\Declaration\Declaration;
 use Shroud\Declaration\ReferenceColumns;
+use Shroud\Declaration\Table;
+use Shroud\Disguiser;
 use Shroud\Generator;
 use Shroud\Identity\Reference;
+use Shroud\Strategy\Pseudonym\Email;
+use Shroud\Strategy\Value\Keep;
 
 final class ReferenceColumnsTest extends TestCase
 {
@@ -122,5 +127,87 @@ final class ReferenceColumnsTest extends TestCase
 
         self::assertInstanceOf(Reference::class, $reference);
         self::assertContains($reference->type, ['a', 'b']);
+    }
+
+    public function testAValueGivesOneObjectHoweverItIsWritten(): void
+    {
+        $generator = new Generator('test salt');
+        $guest = ReferenceColumns::fromValue('guest', 'billing_email');
+
+        $first = $guest->resolveIn([
+            'billing_email' => 'Zoe@Example.test',
+        ], $generator);
+        self::assertInstanceOf(Reference::class, $first);
+        self::assertSame('guest', $first->type);
+        self::assertEquals($first, $guest->resolveIn([
+            'billing_email' => ' zoe@example.test ',
+        ], $generator));
+        self::assertNotEquals($first, $guest->resolveIn([
+            'billing_email' => 'other@example.test',
+        ], $generator));
+        self::assertStringNotContainsString('zoe', (string) $first->id, 'a salted digest, never the value');
+        self::assertNull($guest->resolveIn([
+            'billing_email' => ' ',
+        ], $generator), 'an empty value names no object');
+        self::assertNull($guest->resolveIn([
+            'billing_email' => 'zoe@example.test',
+        ]), 'no salt, no object');
+        self::assertEquals(new Reference('user', 7), ReferenceColumns::fromFixedType('user', 'customer_id')->withFallback($guest)->resolveIn([
+            'customer_id' => 7,
+            'billing_email' => 'zoe@example.test',
+        ], $generator));
+    }
+
+    /**
+     * The orders of a guest share one pseudonym, and a guest who signed up takes theirs, whatever the order of the tables.
+     */
+    public function testTheOrdersOfAGuestShareThePseudonymOfTheHolderOfTheirEmail(): void
+    {
+        $declaration = new Declaration([
+            new Table('users', 'id', [
+                'id' => new Keep(),
+                'email' => new Email(),
+            ], ReferenceColumns::fromFixedType('user', 'id')),
+            new Table('orders', 'id', [
+                'id' => new Keep(),
+                'customer_id' => new Keep(),
+                'billing_email' => new Email(),
+            ], ReferenceColumns::fromFixedType('user', 'customer_id')->withFallback(ReferenceColumns::fromValue('guest', 'billing_email'))),
+        ]);
+        $users = [[
+            'id' => '7',
+            'email' => 'zoe@example.test',
+        ]];
+        $orders = [
+            [
+                'id' => '1',
+                'customer_id' => '0',
+                'billing_email' => 'Zoe@Example.test',
+            ],
+            [
+                'id' => '2',
+                'customer_id' => '0',
+                'billing_email' => 'paul@example.test',
+            ],
+            [
+                'id' => '3',
+                'customer_id' => '0',
+                'billing_email' => 'PAUL@example.test',
+            ],
+        ];
+
+        foreach ([[
+            'users' => $users,
+            'orders' => $orders,
+        ], [
+            'orders' => $orders,
+            'users' => $users,
+        ]] as $tables) {
+            $result = new Disguiser($declaration, new Generator('test salt'))->disguiseTables($tables);
+
+            self::assertSame($result['users'][0]['email'], $result['orders'][0]['billing_email'], 'the guest who signed up');
+            self::assertSame($result['orders'][1]['billing_email'], $result['orders'][2]['billing_email'], 'two orders of one guest');
+            self::assertNotSame($result['orders'][0]['billing_email'], $result['orders'][1]['billing_email']);
+        }
     }
 }

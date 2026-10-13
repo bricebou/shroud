@@ -58,6 +58,13 @@ final class Generator
     private array $holders = [];
 
     /**
+     * The value each object drawn from a value comes from, by reference key: its kind and its key.
+     *
+     * @var array<string, array{string, string}>
+     */
+    private array $drawnFrom = [];
+
+    /**
      * @param bool $renumbering false to leave every id untouched
      * @param LanguageInterface $language the words of the fake identities and the conventions that the shape-preserving replacement follows
      * @param PlatformInterface $platform the platform that owns the base, generic by default
@@ -167,14 +174,27 @@ final class Generator
      * Notes that an object holds a value, so that the value follows it wherever it is quoted.
      *
      * A value held by several objects, a switchboard number, goes to the smallest reference key:
-     * the result does not depend on the order of the reads.
+     * the result does not depend on the order of the reads. An object drawn from a value never
+     * holds one.
      */
     public function noteHolder(string $kind, string $value, Reference $holder): void
     {
+        // An object drawn from a value holds nothing: it is the one that may follow a holder.
+        if (isset($this->drawnFrom[$holder->toKey()])) {
+            return;
+        }
         $current = $this->holders[$kind][$value] ?? null;
         if (! $current instanceof Reference || strcmp($holder->toKey(), $current->toKey()) < 0) {
             $this->holders[$kind][$value] = $holder;
         }
+    }
+
+    /**
+     * Notes the value an object was drawn from, so that its pseudonym becomes that of the holder of the value, if any.
+     */
+    public function noteDrawnFrom(Reference $reference, string $kind, string $value): void
+    {
+        $this->drawnFrom[$reference->toKey()] = [$kind, $value];
     }
 
     /**
@@ -201,6 +221,13 @@ final class Generator
      */
     public function pseudonymFor(Reference $reference): Pseudonym
     {
+        // An object drawn from a value held by another, a guest who signed up, is that other.
+        [$kind, $value] = $this->drawnFrom[$reference->toKey()] ?? ['', ''];
+        $holder = $kind === '' ? null : $this->holderOf($kind, $value);
+        if ($holder instanceof Reference && $holder->toKey() !== $reference->toKey()) {
+            return $this->pseudonymFor($holder);
+        }
+
         return Pseudonym::unpack($this->pseudonyms[$reference->toKey()]
             ??= Pseudonym::draw(
                 $this->language->vocabulary(),

@@ -40,8 +40,8 @@ final readonly class OwnerLink implements ObserverInterface, CompositeInterface
      */
     public function observe(mixed $value, Context $context): void
     {
-        $owned = $this->owned->resolveIn($context->row);
-        $owner = $this->owner->resolveIn($context->row);
+        $owned = $this->owned->resolveIn($context->row, $context->generator);
+        $owner = $this->owner->resolveIn($context->row, $context->generator);
         if ($owned instanceof Reference && $owner instanceof Reference && $owned->toKey() !== $owner->toKey()) {
             $context->generator->remember($owned, ReferenceColumns::OWNER, $owner);
         }

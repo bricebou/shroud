@@ -91,6 +91,13 @@ of the card, learns during the observation that the object of the row belongs to
 the email to the contact, the contact to the person. A reference declared `followingOwner()`
 climbs that chain, and the email of the person carries the same pseudonym as their name.
 
+A row may name its person by nothing but a value: the order of a guest customer carries no user,
+only an email. `ReferenceColumns::fromValue('guest', 'billing_email')`, usually as the fallback
+of the user column, gives every row carrying the same address, case and blanks aside, the same
+object, whose id is a salted digest of the address, kept in memory only. When an `Email` column
+holds that address for a person, the guest takes the pseudonym of that person: a guest who
+signed up keeps one identity.
+
 ## Extending a declaration
 
 A site does not start from scratch. It takes the bare declaration of its platform and completes
