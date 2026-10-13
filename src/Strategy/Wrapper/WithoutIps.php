@@ -9,7 +9,7 @@ use Shroud\Strategy\Observation;
 use Shroud\Strategy\RelayingObserverInterface;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Keep;
-use Shroud\Text\IpAddresses;
+use Shroud\Text\Ips;
 
 /**
  * Replaces the IP addresses of a text kept as is, or transformed by another strategy.
@@ -19,7 +19,7 @@ use Shroud\Text\IpAddresses;
  * without reference keeps who came back from where. Loopback, private and reserved addresses
  * identify nobody and stay. The rest of the text does not change.
  */
-final readonly class WithoutIp implements RelayingObserverInterface
+final readonly class WithoutIps implements RelayingObserverInterface
 {
     public function __construct(
         private StrategyInterface $inner = new Keep(),
@@ -36,7 +36,7 @@ final readonly class WithoutIp implements RelayingObserverInterface
             return $result;
         }
 
-        return IpAddresses::replaceIn($result, static fn (string $address): string => IpAddresses::disguise($address, $context->generator));
+        return Ips::replaceIn($result, static fn (string $address): string => Ips::disguise($address, $context->generator));
     }
 
     public function observe(mixed $value, Context $context): void

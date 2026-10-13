@@ -279,7 +279,7 @@ final class DraftTest extends TestCase
         $code = $draft->table($orders, $declaration);
         self::assertStringContainsString("'post_status' => new Keep(),", $code);
         self::assertStringContainsString("'billing_email' => new Email(), // @todo review", $code);
-        self::assertStringContainsString("'ip_address' => new WithoutIp(),", $code);
+        self::assertStringContainsString("'ip_address' => new WithoutIps(),", $code);
         self::assertStringContainsString("'user_agent' => new Clear(),", $code);
         self::assertStringContainsString("'transaction_id' => new Keep(),", $code, 'an id shape wins, the glossary does not see it');
         self::assertStringContainsString("'new_order_email_sent' => new Keep(),", $code, 'a number takes no text strategy');

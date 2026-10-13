@@ -232,7 +232,7 @@ then from the glossaries, then from its SQL type:
 | What the platform rules name: its secrets, its polymorphic link columns | What the platform says |
 | `id_xxx` or `xxx_id` of a type renumbered in the declaration | `RenumberedId('xxx')`, `Keep` otherwise |
 | `password`, `secret`, `token`, `cookie`, `iban`, `gender`… | `Clear` |
-| `ip`, `ips`, `ip_address`, `remote_addr` | `WithoutIp`: each address disguised, the same everywhere |
+| `ip`, `ips`, `ip_address`, `remote_addr` | `WithoutIps`: each address disguised, the same everywhere |
 | `birth_date`, `date_naissance` | `ShiftedDate` |
 | `status`, `lang`, `type`, `rank`, `date`, `amount`, `price`… | `Keep` |
 | `data`, `prefs`, `config`, `uuid`… | `Keep`, to review: a blob or an external id |

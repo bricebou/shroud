@@ -13,9 +13,9 @@ use Shroud\Strategy\Value\Constant;
 use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Wrapper\Fallback;
 use Shroud\Strategy\Wrapper\WithoutEmails;
-use Shroud\Strategy\Wrapper\WithoutIp;
+use Shroud\Strategy\Wrapper\WithoutIps;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
-use Shroud\Text\IpAddresses;
+use Shroud\Text\Ips;
 
 final class WrapperStrategiesTest extends StrategyTestCase
 {
@@ -113,15 +113,15 @@ final class WrapperStrategiesTest extends StrategyTestCase
     public function testWithoutIpReplacesEachRoutableAddressTheSameWayEverywhere(): void
     {
         $generator = new Generator(self::SALT);
-        $fake = IpAddresses::disguise('203.0.114.7', $generator);
+        $fake = Ips::disguise('203.0.114.7', $generator);
 
-        self::assertSame("Seen from {$fake}, then {$fake} and 10.0.0.1.", self::apply(new WithoutIp(), 'Seen from 203.0.114.7, then 203.0.114.7 and 10.0.0.1.', self::context($generator)));
-        self::assertSame($fake, self::apply(new WithoutIp(), '203.0.114.7', self::context($generator, column: 'other', key: '7', reference: null)), 'no reference needed');
-        self::assertSame('x', self::apply(new WithoutIp(new Constant('x')), '203.0.114.7'));
-        self::assertSame('no address, 12:30', self::apply(new WithoutIp(), 'no address, 12:30'));
-        self::assertNull(self::apply(new WithoutIp(), value: null));
+        self::assertSame("Seen from {$fake}, then {$fake} and 10.0.0.1.", self::apply(new WithoutIps(), 'Seen from 203.0.114.7, then 203.0.114.7 and 10.0.0.1.', self::context($generator)));
+        self::assertSame($fake, self::apply(new WithoutIps(), '203.0.114.7', self::context($generator, column: 'other', key: '7', reference: null)), 'no reference needed');
+        self::assertSame('x', self::apply(new WithoutIps(new Constant('x')), '203.0.114.7'));
+        self::assertSame('no address, 12:30', self::apply(new WithoutIps(), 'no address, 12:30'));
+        self::assertNull(self::apply(new WithoutIps(), value: null));
         self::assertEquals([
-            'log' => new WithoutIp(),
-        ], WithoutIp::forColumns(['log']));
+            'log' => new WithoutIps(),
+        ], WithoutIps::forColumns(['log']));
     }
 }

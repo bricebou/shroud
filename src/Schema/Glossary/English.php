@@ -22,7 +22,7 @@ final class English implements GlossaryInterface
             // The keys of key/value tables: never cleared, never replaced.
             new DraftRule('/^(meta|option|setting|config|field|attribute)_?(key|name)$/', 'new Keep()'),
             // The IP addresses: each one disguised, the same everywhere.
-            new DraftRule('/(^|_)(ip|ips|ip_?addr(ess)?|remote_?addr)$/', 'new WithoutIp()'),
+            new DraftRule('/(^|_)(ip|ips|ip_?addr(ess)?|remote_?addr)$/', 'new WithoutIps()'),
             // Secrets and sensitive data: cleared.
             new DraftRule('/^(pass|password|passwd|pwd|secret|token|hash|salt|cookie|user_?agent)$/', 'new Clear()'),
             new DraftRule('/_(pass|password|passwd|secret|token|tokens|hash|salt|cookie|user_?agent)$|^(password|secret|token|cookie)_/', 'new Clear()'),

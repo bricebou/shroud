@@ -18,7 +18,7 @@ use Shroud\Strategy\Pseudonym\PostalCode;
 use Shroud\Strategy\Pseudonym\Street;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
-use Shroud\Text\IpAddresses;
+use Shroud\Text\Ips;
 
 final class PseudonymStrategiesTest extends StrategyTestCase
 {
@@ -130,12 +130,12 @@ final class PseudonymStrategiesTest extends StrategyTestCase
     {
         $generator = new Generator(self::SALT);
         $context = self::context($generator);
-        $ipv4 = IpAddresses::forObject(new Reference('person', 42), ipv6: false, generator: $generator);
+        $ipv4 = Ips::forObject(new Reference('person', 42), ipv6: false, generator: $generator);
 
         self::assertSame($ipv4, self::apply(new Ip(), '203.0.114.7', $context));
         self::assertSame($ipv4, self::apply(new Ip(), '198.51.101.9', $context), 'every address of the object');
         self::assertSame('::ffff:' . $ipv4, self::apply(new Ip(), '::ffff:203.0.114.7', $context));
-        self::assertSame(IpAddresses::forObject(new Reference('person', 42), ipv6: true, generator: $generator), self::apply(new Ip(), '2a00:1450:4007:80e::200e', $context));
+        self::assertSame(Ips::forObject(new Reference('person', 42), ipv6: true, generator: $generator), self::apply(new Ip(), '2a00:1450:4007:80e::200e', $context));
         self::assertSame('127.0.0.1', self::apply(new Ip(), '127.0.0.1', $context));
         self::assertSame('10.1.2.3', self::apply(new Ip(), '10.1.2.3', $context));
     }

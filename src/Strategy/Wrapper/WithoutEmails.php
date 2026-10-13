@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace Shroud\Strategy\Wrapper;
 
 use Shroud\Context;
-use Shroud\Identity\Gender;
-use Shroud\Identity\Pseudonym;
 use Shroud\Strategy\Observation;
 use Shroud\Strategy\RelayingObserverInterface;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Keep;
-use Shroud\Text\Words;
+use Shroud\Text\Emails;
 
 /**
  * Replaces the email addresses of a text kept as is, or transformed by another strategy.
@@ -22,12 +20,6 @@ use Shroud\Text\Words;
  */
 final readonly class WithoutEmails implements RelayingObserverInterface
 {
-    /**
-     * An address, internationalised ones included: Unicode letters in the local part and the domain.
-     * A missed address leaks, while a false positive only replaces a string that looked like one.
-     */
-    private const string EMAIL = '/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}{2,}/u';
-
     public function __construct(
         private StrategyInterface $inner = new Keep(),
     ) {
@@ -39,27 +31,11 @@ final readonly class WithoutEmails implements RelayingObserverInterface
     public function apply(mixed $value, Context $context): mixed
     {
         $result = $this->inner->apply($value, $context);
-        if (! is_string($result) || ! str_contains($result, '@')) {
+        if (! is_string($result)) {
             return $result;
         }
 
-        return preg_replace_callback(
-            self::EMAIL,
-            static fn (array $match): string => self::fakeAddress($context, mb_strtolower($match[0])),
-            $result,
-        ) ?? $result;
-    }
-
-    /**
-     * Draws the fake address of a real one: names of the language, a reserved domain.
-     */
-    private static function fakeAddress(Context $context, string $address): string
-    {
-        $draw = $context->generator->draw('email', $address);
-        $vocabulary = $context->generator->language()->vocabulary();
-        $firstName = $vocabulary->firstName($draw->boolean() ? Gender::Female : Gender::Male, $draw);
-
-        return Words::toSlug($firstName) . '.' . Words::toSlug($vocabulary->lastName($draw)) . '@' . $draw->pick(Pseudonym::EMAIL_DOMAINS);
+        return Emails::replaceIn($result, static fn (string $address): string => Emails::disguise($address, $context->generator));
     }
 
     public function observe(mixed $value, Context $context): void

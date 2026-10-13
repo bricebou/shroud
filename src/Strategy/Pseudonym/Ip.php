@@ -8,7 +8,7 @@ use Shroud\Context;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Strategy\AbstractTextStrategy;
-use Shroud\Text\IpAddresses;
+use Shroud\Text\Ips;
 
 /**
  * Replaces an IP address by the one of the referenced object: one address per object, IPv4 or
@@ -24,18 +24,18 @@ final class Ip extends AbstractTextStrategy
     protected function transform(string $value, Context $context): string
     {
         $reference = $context->reference ?? throw new MissingReferenceException($context->table, $context->column);
-        if (! IpAddresses::isAddress($value)) {
+        if (! Ips::isAddress($value)) {
             throw new InvalidValueException($context->table, $context->column, 'not an IP address');
         }
         // An IPv4 address written as IPv6 is an IPv4 address, whose prefix the range test rejects.
-        $mapped = IpAddresses::mappedIpv4($value);
+        $mapped = Ips::mappedIpv4($value);
         if ($mapped !== null) {
             return '::ffff:' . $this->transform($mapped, $context);
         }
-        if (! IpAddresses::isRoutable($value)) {
+        if (! Ips::isRoutable($value)) {
             return $value;
         }
 
-        return IpAddresses::forObject($reference, str_contains($value, ':'), $context->generator);
+        return Ips::forObject($reference, str_contains($value, ':'), $context->generator);
     }
 }

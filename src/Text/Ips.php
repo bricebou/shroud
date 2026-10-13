@@ -21,7 +21,7 @@ use Shroud\Identity\Reference;
  * - an IPv6 address becomes a digest of 95 bits in the documentation range `2001:db8::/32`,
  *   the values and the objects in two halves of it.
  */
-final class IpAddresses
+final class Ips
 {
     /**
      * An IPv6 address, an IPv4 tail included, or an IPv4 address, glued to no word, colon or other number.

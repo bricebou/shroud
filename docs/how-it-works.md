@@ -25,7 +25,7 @@ what they need:
   row.
 - `Wrapper`: the strategy wraps another one and acts on the whole value. `Fallback` applies a
   second strategy to the values the first refuses, so that the caller decides what becomes of
-  malformed data; `WithoutEmails` and `WithoutIp` replace the email and IP addresses of what the
+  malformed data; `WithoutEmails` and `WithoutIps` replace the email and IP addresses of what the
   wrapped strategy returns; `Hashed` hashes it, for a column that stores the digest of another.
 
 ## The generator

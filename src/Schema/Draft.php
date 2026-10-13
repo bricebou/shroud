@@ -31,7 +31,7 @@ use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Value\ShapedText;
 use Shroud\Strategy\Value\ShiftedDate;
 use Shroud\Strategy\Wrapper\Fallback;
-use Shroud\Strategy\Wrapper\WithoutIp;
+use Shroud\Strategy\Wrapper\WithoutIps;
 
 /**
  * Proposes, as PHP code, the declaration of what a base carries and a declaration ignores.
@@ -74,7 +74,7 @@ final readonly class Draft
         'PerKey' => PerKey::class,
         'Serialized' => Serialized::class,
         'Fallback' => Fallback::class,
-        'WithoutIp' => WithoutIp::class,
+        'WithoutIps' => WithoutIps::class,
         'Declaration' => Declaration::class,
         'ReferenceColumns' => ReferenceColumns::class,
         'Table' => Table::class,
@@ -83,7 +83,7 @@ final readonly class Draft
     /**
      * The strategies that draw no pseudonym: a table made of them only needs no reference.
      */
-    private const array IMPERSONAL = ['Keep', 'Clear', 'Constant', 'ShapedText', 'ShapedDigits', 'ShiftedDate', 'RenumberedId', 'RenumberedPolymorphicId', 'EmbeddedReferences', 'ByColumn', 'Fallback', 'WithoutIp'];
+    private const array IMPERSONAL = ['Keep', 'Clear', 'Constant', 'ShapedText', 'ShapedDigits', 'ShiftedDate', 'RenumberedId', 'RenumberedPolymorphicId', 'EmbeddedReferences', 'ByColumn', 'Fallback', 'WithoutIps'];
 
     /**
      * The SQL types of numbers, which take no text strategy.
