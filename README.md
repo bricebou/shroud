@@ -152,8 +152,8 @@ connection file, its draft rules and its glossaries. A project then starts from 
 declaration and adds its own tables and columns; `shroud-diff` tells apart what belongs to the
 site from what belongs to the version of the platform.
 
-The first platform package, for SPIP, lives on
-[git.spip.net](https://git.spip.net/spip-contrib-outils/shroud-spip). Without a platform
+The first platform package, for SPIP, is
+[momh/shroud-spip](https://github.com/bricebou/shroud-spip). Without a platform
 package, the core treats the base as a generic relational base whose texts carry HTML at most,
 and the declaration is written by hand, with `shroud-diff` drafting it.
 
