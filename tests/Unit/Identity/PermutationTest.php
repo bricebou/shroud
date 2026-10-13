@@ -73,4 +73,41 @@ final class PermutationTest extends TestCase
             self::assertSame($id, $identity->invert($id));
         }
     }
+
+    public function testANarrowerNetworkStaysWithinItsWidth(): void
+    {
+        $permutation = new Permutation('test key', bits: 8);
+        $seen = [];
+        for ($id = 1; $id <= 255; ++$id) {
+            $permuted = $permutation->apply($id);
+            self::assertGreaterThanOrEqual(1, $permuted);
+            self::assertLessThanOrEqual(255, $permuted);
+            self::assertSame($id, $permutation->invert($permuted));
+            $seen[$permuted] = true;
+        }
+
+        self::assertCount(255, $seen, 'a bijection on 1 to 255');
+    }
+
+    public function testADomainNamedByTheCallerIsKept(): void
+    {
+        $permutation = new Permutation('test key', bits: 8);
+        $even = static fn (int $value): bool => $value % 2 === 0;
+        $seen = [];
+        for ($value = 0; $value <= 254; $value += 2) {
+            $permuted = $permutation->applyWithin($value, $even);
+            self::assertTrue($even($permuted));
+            self::assertSame($value, $permutation->invertWithin($permuted, $even));
+            $seen[$permuted] = true;
+        }
+
+        self::assertCount(128, $seen, 'a bijection on the even values');
+    }
+
+    public function testTheWidthIsEvenAndAtMostThirtyTwoBits(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new Permutation('test key', bits: 27);
+    }
 }

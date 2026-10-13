@@ -114,6 +114,18 @@ final class Generator
     }
 
     /**
+     * Returns a permutation of the given width keyed from the salt and the keys, for a value that is not an id.
+     *
+     * Unlike `permutationFor()`, it never turns into the identity: an IP address is disguised
+     * whether the ids are renumbered or not.
+     */
+    public function permutation(int $bits, string|int ...$keys): Permutation
+    {
+        return $this->permutations["\x1e" . implode("\x1f", [$bits, ...$keys])]
+            ??= new Permutation(hash('sha256', implode("\x1f", [$this->salt, 'permutation', $bits, ...$keys]), binary: true), bits: $bits);
+    }
+
+    /**
      * Notes, under a key, a fact of shape observed on an object.
      */
     public function remember(Reference $reference, string $key, mixed $value): void
