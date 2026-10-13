@@ -15,6 +15,7 @@ use Shroud\Strategy\Value\Constant;
 use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Wrapper\Fallback;
 use Shroud\Strategy\Wrapper\WithoutEmails;
+use Shroud\Strategy\Wrapper\WithoutIdentifiers;
 use Shroud\Strategy\Wrapper\WithoutIps;
 use Shroud\Strategy\Wrapper\WithoutPhones;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
@@ -173,5 +174,26 @@ final class WrapperStrategiesTest extends StrategyTestCase
 
         self::assertEquals($first->holderOf('phone', $key), $second->holderOf('phone', $key));
         self::assertNull($first->holderOf('phone', 'unknown'));
+    }
+
+    /**
+     * The three wrappers combine on one text, in any order, and leave the rest of it alone.
+     */
+    public function testWithoutIdentifiersReplacesTheAddressesTheNumbersAndTheIps(): void
+    {
+        $text = 'Write to zoe.martin@example.test, call 06 12 34 56 78 or +33 1 23 45 67 89, seen from 203.0.114.7 and 2a00:1450:4007:80e::200e on 12.03.2026.';
+        $context = self::context(new Generator(self::SALT), reference: null);
+        $result = self::applyToString(new WithoutIdentifiers(), $text, $context);
+
+        foreach (['zoe.martin@example.test', '12 34 56 78', '23 45 67 89', '203.0.114.7', '2a00:1450'] as $identifier) {
+            self::assertStringNotContainsString($identifier, $result);
+        }
+        self::assertStringStartsWith('Write to ', $result);
+        self::assertStringEndsWith(' on 12.03.2026.', $result);
+        self::assertSame($result, self::apply(new WithoutIps(new WithoutPhones(new WithoutEmails())), $text, $context), 'in any order');
+        self::assertSame('x', self::apply(new WithoutIdentifiers(new Constant('x')), $text));
+        self::assertEquals([
+            'body' => new WithoutIdentifiers(),
+        ], WithoutIdentifiers::forColumns(['body']));
     }
 }
