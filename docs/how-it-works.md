@@ -22,7 +22,8 @@ what they need:
   the row; `OwnerLink` learns during the observation that an object belongs to another.
 - `Nested`: the strategy carries others and applies them to the parts of the value: by key of
   an array, inside a serialized blob or a JSON document, or according to another column of the
-  row.
+  row. `Serialized` given a strategy for the plain values also takes a column the application
+  may or may not have serialized.
 - `Wrapper`: the strategy wraps another one and acts on the whole value. `Fallback` applies a
   second strategy to the values the first refuses, so that the caller decides what becomes of
   malformed data; `WithoutEmails`, `WithoutPhones` and `WithoutIps` replace the email addresses,

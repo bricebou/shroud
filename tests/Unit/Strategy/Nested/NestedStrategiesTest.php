@@ -9,12 +9,14 @@ use Shroud\Declaration\Table;
 use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Generator;
+use Shroud\Identity\Reference;
 use Shroud\Strategy\Nested\ByColumn;
 use Shroud\Strategy\Nested\Delimited;
 use Shroud\Strategy\Nested\Json;
 use Shroud\Strategy\Nested\PerKey;
 use Shroud\Strategy\Nested\Serialized;
 use Shroud\Strategy\Pseudonym\Email;
+use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Reference\RenumberedId;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;
@@ -103,6 +105,42 @@ final class NestedStrategiesTest extends StrategyTestCase
         $this->expectExceptionMessage('array expected, __PHP_Incomplete_Class given');
 
         self::apply(new Serialized(new PerKey([], new Keep())), serialize(new \ArrayObject()));
+    }
+
+    /**
+     * A column the application may or may not have serialized: every kind of value finds its way.
+     */
+    public function testSerializedWithAPlainStrategyTakesWhatIsNotASerializedArray(): void
+    {
+        $maybe = new Serialized(new PerKey([
+            'email' => new Constant('hidden'),
+        ], new Keep()), new Constant('plain'));
+
+        self::assertSame(serialize([
+            'email' => 'hidden',
+            'id' => 7,
+        ]), self::apply($maybe, serialize([
+            'email' => 'zoe@example.test',
+            'id' => 7,
+        ])), 'an array, key by key');
+        self::assertSame(serialize('plain'), self::apply($maybe, serialize('zoe@example.test')), 'a string, serialized again');
+        self::assertSame('plain', self::apply($maybe, 'zoe@example.test'), 'a value that is not serialized');
+        self::assertSame('plain', self::apply($maybe, 'a:2:{s:5:"email";'), 'a corrupted blob, never kept');
+        foreach ([serialize(42), serialize(value: true), serialize(value: false), serialize(value: null), serialize(new \ArrayObject())] as $kept) {
+            self::assertSame($kept, self::apply($maybe, $kept), 'a number, a boolean, a null, an object: kept');
+        }
+        self::assertNull(self::apply($maybe, value: null));
+    }
+
+    public function testSerializedRelaysTheObservationToThePlainStrategy(): void
+    {
+        $generator = new Generator(self::SALT);
+        $context = self::context($generator);
+        $maybe = new Serialized(new PerKey([], new Keep()), new FirstName());
+
+        $maybe->observe(serialize('Jean Pierre'), $context);
+
+        self::assertSame(2, $generator->recall(new Reference('person', 42), FirstName::WORD_COUNT));
     }
 
     public function testJsonAppliesTheStrategiesPerKey(): void
