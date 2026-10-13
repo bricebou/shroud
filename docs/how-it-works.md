@@ -14,7 +14,8 @@ what they need:
 - `Pseudonym`: the strategy draws from the **pseudonym** of the referenced object, the complete
   fake identity drawn once for it: a gender and first names of that gender, last names,
   organization words, email, handle, street, postal code, city, the digits of a phone number.
-  A civility follows the drawn gender, never the real one. A row without reference is refused.
+  A civility follows the drawn gender, never the real one; an IP address, one per object, follows
+  its id. A row without reference is refused.
 - `Reference`: the strategy renumbers an id. `RenumberedId('person')` on any column that carries
   the id of a person, primary or foreign key, declares persons renumbered everywhere;
   `RenumberedPolymorphicId('object_type')` on the id of a polymorphic link reads the type from
@@ -24,8 +25,8 @@ what they need:
   row.
 - `Wrapper`: the strategy wraps another one and acts on the whole value. `Fallback` applies a
   second strategy to the values the first refuses, so that the caller decides what becomes of
-  malformed data; `WithoutEmails` replaces the email addresses of what the wrapped strategy
-  returns; `Hashed` hashes it, for a column that stores the digest of another.
+  malformed data; `WithoutEmails` and `WithoutIp` replace the email and IP addresses of what the
+  wrapped strategy returns; `Hashed` hashes it, for a column that stores the digest of another.
 
 ## The generator
 

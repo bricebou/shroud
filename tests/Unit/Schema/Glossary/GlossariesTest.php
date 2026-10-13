@@ -37,7 +37,8 @@ final class GlossariesTest extends TestCase
         yield 'english hashtags, not a hash' => [new English(), 'hashtags', null];
         yield 'english excluded mobiles, not a phone' => [new English(), 'mobile_exclus', null];
         yield 'english rank before link' => [new English(), 'rank_link', 'new Keep()'];
-        yield 'english ip list' => [new English(), 'access_ips', 'new Clear()'];
+        yield 'english ip list' => [new English(), 'access_ips', 'new WithoutIp()'];
+        yield 'english ip address' => [new English(), 'remote_addr', 'new WithoutIp()'];
         yield 'english vendor token' => [new English(), 'vosfacturesfr_token', 'new Clear()'];
         yield 'english blob to review' => [new English(), 'payment_data', 'new Keep()'];
     }

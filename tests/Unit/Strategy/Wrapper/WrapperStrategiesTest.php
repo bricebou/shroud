@@ -6,13 +6,16 @@ namespace Shroud\Tests\Unit\Strategy\Wrapper;
 
 use Shroud\Context;
 use Shroud\Exception\MissingReferenceException;
+use Shroud\Generator;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;
 use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Wrapper\Fallback;
 use Shroud\Strategy\Wrapper\WithoutEmails;
+use Shroud\Strategy\Wrapper\WithoutIp;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
+use Shroud\Text\IpAddresses;
 
 final class WrapperStrategiesTest extends StrategyTestCase
 {
@@ -105,5 +108,20 @@ final class WrapperStrategiesTest extends StrategyTestCase
         preg_match_all('/[a-z0-9._-]+@example\.(?:org|com|net)/', $result, $fakes);
         self::assertCount(3, $fakes[0]);
         self::assertSame($fakes[0][0], $fakes[0][2], 'the case does not make two addresses');
+    }
+
+    public function testWithoutIpReplacesEachRoutableAddressTheSameWayEverywhere(): void
+    {
+        $generator = new Generator(self::SALT);
+        $fake = IpAddresses::disguise('203.0.114.7', $generator);
+
+        self::assertSame("Seen from {$fake}, then {$fake} and 10.0.0.1.", self::apply(new WithoutIp(), 'Seen from 203.0.114.7, then 203.0.114.7 and 10.0.0.1.', self::context($generator)));
+        self::assertSame($fake, self::apply(new WithoutIp(), '203.0.114.7', self::context($generator, column: 'other', key: '7', reference: null)), 'no reference needed');
+        self::assertSame('x', self::apply(new WithoutIp(new Constant('x')), '203.0.114.7'));
+        self::assertSame('no address, 12:30', self::apply(new WithoutIp(), 'no address, 12:30'));
+        self::assertNull(self::apply(new WithoutIp(), value: null));
+        self::assertEquals([
+            'log' => new WithoutIp(),
+        ], WithoutIp::forColumns(['log']));
     }
 }

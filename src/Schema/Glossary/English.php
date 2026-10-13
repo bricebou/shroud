@@ -21,10 +21,12 @@ final class English implements GlossaryInterface
         return [
             // The keys of key/value tables: never cleared, never replaced.
             new DraftRule('/^(meta|option|setting|config|field|attribute)_?(key|name)$/', 'new Keep()'),
+            // The IP addresses: each one disguised, the same everywhere.
+            new DraftRule('/(^|_)(ip|ips|ip_?addr(ess)?|remote_?addr)$/', 'new WithoutIp()'),
             // Secrets and sensitive data: cleared.
-            new DraftRule('/^(pass|password|passwd|pwd|secret|token|hash|salt|cookie|ip|ips|user_?agent)$/', 'new Clear()'),
-            new DraftRule('/_(pass|password|passwd|secret|token|tokens|hash|salt|cookie|ip|ips|user_?agent)$|^(password|secret|token|cookie)_/', 'new Clear()'),
-            new DraftRule('/(^|_)(api_?key|activation_?key|session_?tokens?|order_?key|cart_?hash|ip_?addr(ess)?)$/', 'new Clear()'),
+            new DraftRule('/^(pass|password|passwd|pwd|secret|token|hash|salt|cookie|user_?agent)$/', 'new Clear()'),
+            new DraftRule('/_(pass|password|passwd|secret|token|tokens|hash|salt|cookie|user_?agent)$|^(password|secret|token|cookie)_/', 'new Clear()'),
+            new DraftRule('/(^|_)(api_?key|activation_?key|session_?tokens?|order_?key|cart_?hash)$/', 'new Clear()'),
             new DraftRule('/(^|_)(iban|bic|swift|card_?number|cc_?number|cvv|ssn|gender|sex|religion|ethnicity)(_|$)/', 'new Clear()'),
             new DraftRule('/(^|_)(log|logs)$/', 'new Clear()', review: true),
             // Dates to shift, before the dates to keep.
