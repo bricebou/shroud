@@ -51,7 +51,8 @@ Dry run: 5712394 rows in 140 tables, 3 refusals in 2 columns.
 ```
 
 Each line names what to fix in the declaration: a `Fallback` around the strategy that refuses,
-a reference column for the row that has none. The exit code is 1 on a refusal, 0 when every
+a reference column for the row that has none, a narrower width for the renumbered ids that a
+column could not hold, which also stops the dump itself before it writes anything. The exit code is 1 on a refusal, 0 when every
 row passes.
 
 ### The random salt

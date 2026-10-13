@@ -11,6 +11,7 @@ use Shroud\Declaration\Declaration;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Declaration\Table;
 use Shroud\Disguiser;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\UndeclaredTableException;
 use Shroud\Generator;
 use Shroud\Strategy\Nested\PerKey;
@@ -155,6 +156,25 @@ final class MysqlTest extends TestCase
         $this->expectException(UndeclaredTableException::class);
 
         new MysqlDump($this->connect(self::SOURCE), $this->declaration(), new Disguiser($this->declaration(), new Generator('integration salt')))->write($output);
+    }
+
+    /**
+     * A column too narrow for the renumbered ids stops the dump before any row, and the dry run reports it.
+     */
+    public function testAColumnTooNarrowForItsIdsStopsTheDump(): void
+    {
+        $this->server->exec(sprintf('ALTER TABLE %s.links MODIFY id_person MEDIUMINT UNSIGNED NOT NULL', self::SOURCE));
+        $dump = new MysqlDump($this->connect(self::SOURCE), $this->declaration(), new Disguiser($this->declaration(), new Generator('integration salt')));
+
+        self::assertFalse($dump->dryRun()->isClean());
+        self::assertStringStartsWith('the ids of person are renumbered on 31 bits', $dump->dryRun()->report()[0]);
+
+        $output = fopen('php://memory', 'w+');
+        self::assertIsResource($output);
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage("links.id_person is mediumint(8) unsigned, up to 16777215: declare RenumberedId('person', bits: 24) or less");
+
+        $dump->write($output);
     }
 
     private function declaration(): Declaration

@@ -40,6 +40,13 @@ final class DryRun implements FallbackListenerInterface
     private array $fallbacks = [];
 
     /**
+     * The columns too narrow for the renumbered ids they receive, one sentence each.
+     *
+     * @var list<string>
+     */
+    private array $narrowColumns = [];
+
+    /**
      * Notes a declared table read, even an empty one.
      */
     public function noteTable(string $table): void
@@ -91,11 +98,21 @@ final class DryRun implements FallbackListenerInterface
     }
 
     /**
-     * Tells whether every row of every table passed.
+     * Notes the columns too narrow for the renumbered ids they receive.
+     *
+     * @param list<string> $problems
+     */
+    public function noteNarrowColumns(array $problems): void
+    {
+        array_push($this->narrowColumns, ...$problems);
+    }
+
+    /**
+     * Tells whether every row of every table passed, and every column can hold its ids.
      */
     public function isClean(): bool
     {
-        return $this->refusals === [] && $this->undeclaredTables === [];
+        return $this->refusals === [] && $this->undeclaredTables === [] && $this->narrowColumns === [];
     }
 
     /**
@@ -117,13 +134,13 @@ final class DryRun implements FallbackListenerInterface
     }
 
     /**
-     * Returns the report: the undeclared tables, the refusals, then the values a fallback took over, and a summary.
+     * Returns the report: the columns too narrow, the undeclared tables, the refusals, then the values a fallback took over, and a summary.
      *
      * @return list<string>
      */
     public function report(): array
     {
-        $lines = [];
+        $lines = $this->narrowColumns;
         foreach ($this->undeclaredTables as $table) {
             $lines[] = sprintf('%s: undeclared table', $table);
         }
@@ -159,6 +176,9 @@ final class DryRun implements FallbackListenerInterface
         }
         if ($this->undeclaredTables !== []) {
             $parts[] = $this->plural(count($this->undeclaredTables), 'undeclared table');
+        }
+        if ($this->narrowColumns !== []) {
+            $parts[] = $this->plural(count($this->narrowColumns), 'column') . ' too narrow for their ids';
         }
         if ($this->fallbacks !== []) {
             $parts[] = sprintf('%s taken over by a fallback', $this->plural($this->total($this->fallbacks), 'value'));

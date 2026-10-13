@@ -8,8 +8,10 @@ use Shroud\Adapter\DryRun;
 use Shroud\Declaration\Declaration;
 use Shroud\Declaration\Table;
 use Shroud\Disguiser;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\InvalidSchemaException;
 use Shroud\Exception\UndeclaredTableException;
+use Shroud\Schema\IdWidths;
 
 /**
  * Reads a MySQL or MariaDB base through PDO and writes a pseudonymised SQL dump, table by table.
@@ -41,6 +43,10 @@ final readonly class MysqlDump
     {
         $present = $this->tableNames();
         $this->refuseUndeclaredTables($present);
+        $narrowColumns = IdWidths::check(new SchemaReader($this->pdo)->read(), $this->declaration);
+        if ($narrowColumns !== []) {
+            throw new InvalidConfigurationException(implode("\n", $narrowColumns));
+        }
         $this->observe($present);
 
         fwrite($output, "SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS = 0;\nSET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';\n\n");
@@ -61,6 +67,7 @@ final readonly class MysqlDump
     public function dryRun(?callable $progress = null): DryRun
     {
         $dryRun = new DryRun();
+        $dryRun->noteNarrowColumns(IdWidths::check(new SchemaReader($this->pdo)->read(), $this->declaration));
         $present = $this->tableNames();
         foreach ($present as $name) {
             if (! $this->declaration->has($name)) {

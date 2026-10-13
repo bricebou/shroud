@@ -59,7 +59,9 @@ The renumbered ids of a type spread over that whole domain, up to 2147483647, wh
 ones were. A copy that creates rows after its import then continues from the largest, close to
 the limit of a signed `INT`. `RenumberedId('person', bits: 24)` narrows the domain of the type to
 1 to 2^24 - 1, leaving room above, and fits a narrower column; a real id beyond it is refused.
-The width holds for the type: declared once, or the same everywhere.
+The width holds for the type: declared once, or the same everywhere. Before writing anything,
+the dump checks that every column receiving renumbered ids can hold the largest of its type, an
+integer column by its type, a string column by its length; the dry run reports the same.
 
 Declaring `RenumberedId('person')` somewhere renumbers the persons everywhere: the foreign keys,
 the polymorphic links whose type is renumbered, the ids inside the blobs, the references the
