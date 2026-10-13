@@ -55,6 +55,12 @@ Feistel network of four rounds over HMAC-SHA256, within the domain of a signed 3
 It is reversible, so that the real id can be found behind a renumbered one by whoever holds the
 salt, and it leaves zero and the negatives alone, the values that mean "no object".
 
+The renumbered ids of a type spread over that whole domain, up to 2147483647, whatever the real
+ones were. A copy that creates rows after its import then continues from the largest, close to
+the limit of a signed `INT`. `RenumberedId('person', bits: 24)` narrows the domain of the type to
+1 to 2^24 - 1, leaving room above, and fits a narrower column; a real id beyond it is refused.
+The width holds for the type: declared once, or the same everywhere.
+
 Declaring `RenumberedId('person')` somewhere renumbers the persons everywhere: the foreign keys,
 the polymorphic links whose type is renumbered, the ids inside the blobs, the references the
 platform embeds in the texts. A link to an object of a type that is not renumbered stays as it

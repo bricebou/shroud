@@ -26,6 +26,7 @@ final readonly class Disguiser
         private Declaration $declaration,
         private Generator $generator,
     ) {
+        $generator->useWidths($declaration->renumberingWidths());
     }
 
     /**

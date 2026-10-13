@@ -22,7 +22,7 @@ the order they apply:
 | An email address in a kept text, when the declaration asks for it | A fake address on a reserved domain, the same for the same address in the whole base, case ignored |
 | A date | Shifted by a number of days specific to the referenced object, so that the gaps between the dates of one object remain; the SQL zero date stays |
 | A hexadecimal digest of another column | The digest of the fake value of that column, with the same algorithm |
-| An id | The number the permutation of its type gives, the same everywhere; zero and negatives stay |
+| An id | The number the permutation of its type gives, the same everywhere, within the width of the type, 31 bits by default; zero and negatives stay |
 
 The language, which holds the words of the fake identities and decides the diacritics, the
 elisions and the civilities, and the observation pass, which holds first name, last name and full

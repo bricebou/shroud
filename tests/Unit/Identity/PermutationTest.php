@@ -110,4 +110,31 @@ final class PermutationTest extends TestCase
 
         new Permutation('test key', bits: 27);
     }
+
+    public function testAnIdWidthBoundsTheIdsAnOddOneIncluded(): void
+    {
+        foreach ([9, 10] as $width) {
+            $permutation = Permutation::ofWidth('test key', $width);
+            $seen = [];
+            for ($id = 1; $id < 1 << $width; ++$id) {
+                $permuted = $permutation->apply($id);
+                self::assertLessThanOrEqual((1 << $width) - 1, $permuted);
+                self::assertSame($id, $permutation->invert($permuted));
+                $seen[$permuted] = true;
+            }
+            self::assertCount((1 << $width) - 1, $seen, "{$width} bits: a bijection");
+            self::assertSame((1 << $width) - 1, $permutation->max);
+        }
+    }
+
+    public function testThirtyOneBitsIsTheDefaultDomain(): void
+    {
+        $default = new Permutation('test key');
+        $width = Permutation::ofWidth('test key', 31);
+
+        foreach ([1, 4242, 1000000, Permutation::MAX] as $id) {
+            self::assertSame($default->apply($id), $width->apply($id));
+        }
+        self::assertSame(Permutation::MAX, $width->max);
+    }
 }

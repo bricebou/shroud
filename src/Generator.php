@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Shroud;
 
+use Shroud\Declaration\Declaration;
 use Shroud\Identity\Permutation;
 use Shroud\Identity\Pseudonym;
 use Shroud\Identity\Reference;
@@ -30,6 +31,13 @@ final class Generator
      * @var array<string, Permutation>
      */
     private array $permutations = [];
+
+    /**
+     * The width of the renumbered ids, by type, that the declaration sets.
+     *
+     * @var array<string, int>
+     */
+    private array $widths = [];
 
     private ?Text $text = null;
 
@@ -117,7 +125,22 @@ final class Generator
         }
 
         return $this->permutations[$type]
-            ??= new Permutation(hash('sha256', implode("\x1f", [$this->salt, 'renumber', $type]), binary: true));
+            ??= Permutation::ofWidth(hash('sha256', implode("\x1f", [$this->salt, 'renumber', $type]), binary: true), $this->widths[$type] ?? Declaration::DEFAULT_WIDTH);
+    }
+
+    /**
+     * Takes the widths of the renumbered ids that a declaration sets, before any id is renumbered.
+     *
+     * @param array<string, int> $widths by type
+     */
+    public function useWidths(array $widths): void
+    {
+        foreach ($widths as $type => $width) {
+            if (isset($this->permutations[$type]) && $this->permutations[$type]->max !== (1 << $width) - 1) {
+                throw new \LogicException(sprintf('the ids of %s were renumbered before their width was set', $type));
+            }
+        }
+        $this->widths = $widths;
     }
 
     /**

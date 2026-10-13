@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Shroud\Declaration\Declaration;
 use Shroud\Declaration\ReferenceColumns;
 use Shroud\Declaration\Table;
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\UndeclaredTableException;
 use Shroud\Strategy\Nested\PerKey;
 use Shroud\Strategy\Nested\Serialized;
@@ -106,6 +107,39 @@ final class DeclarationTest extends TestCase
                 'id_person' => new Keep(),
             ]),
             Table::truncated('visits'),
+        ]);
+    }
+
+    public function testAWidthHoldsForItsTypeAndDefaultsToThirtyOneBits(): void
+    {
+        $declaration = new Declaration([
+            new Table('people', 'id', [
+                'id' => new RenumberedId('person', bits: 24),
+                'id_contact' => new RenumberedId('contact'),
+            ]),
+            new Table('notes', 'id', [
+                'id_person' => new RenumberedId('person'),
+            ]),
+        ]);
+
+        self::assertSame(24, $declaration->renumberingWidth('person'));
+        self::assertSame(31, $declaration->renumberingWidth('contact'));
+        self::assertSame([
+            'person' => 24,
+            'contact' => 31,
+        ], $declaration->renumberingWidths());
+    }
+
+    public function testTwoWidthsForATypeAreRefused(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('the ids of person are renumbered on 24 and 20 bits');
+
+        new Declaration([
+            new Table('people', 'id', [
+                'id' => new RenumberedId('person', bits: 24),
+                'id_parent' => new RenumberedId('person', bits: 20),
+            ]),
         ]);
     }
 }

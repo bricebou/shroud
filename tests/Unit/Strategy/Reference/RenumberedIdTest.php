@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Shroud\Tests\Unit\Strategy\Reference;
 
+use Shroud\Declaration\Declaration;
+use Shroud\Declaration\Table;
+use Shroud\Disguiser;
 use Shroud\Exception\InvalidValueException;
 use Shroud\Generator;
 use Shroud\Identity\Permutation;
@@ -105,5 +108,25 @@ final class RenumberedIdTest extends StrategyTestCase
 
         self::assertSame('', self::apply($author, '192.0.2.1'));
         self::assertSame(self::apply(new RenumberedId('author'), '12'), self::apply($author, '12'));
+    }
+
+    /**
+     * The disguiser hands the declared width to the generator: the ids stay below it, and a larger real id is refused.
+     */
+    public function testTheDeclaredWidthBoundsTheRenumberedIds(): void
+    {
+        $generator = new Generator(self::SALT);
+        new Disguiser(new Declaration([
+            new Table('people', 'id', [
+                'id' => new RenumberedId('person', bits: 12),
+            ])]), $generator);
+
+        for ($id = 1; $id <= 4095; $id += 97) {
+            self::assertLessThanOrEqual(4095, self::apply(new RenumberedId('person'), $id, self::context($generator)));
+        }
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('id beyond 4095');
+
+        self::apply(new RenumberedId('person'), 4096, self::context($generator));
     }
 }

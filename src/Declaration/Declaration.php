@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Shroud\Declaration;
 
+use Shroud\Exception\InvalidConfigurationException;
 use Shroud\Exception\UndeclaredTableException;
 use Shroud\Strategy\CompositeInterface;
 use Shroud\Strategy\Reference\RenumberedId;
@@ -18,6 +19,11 @@ use Shroud\Strategy\StrategyInterface;
 final class Declaration
 {
     /**
+     * The width of the renumbered ids of a type that declares none: up to a signed INT.
+     */
+    public const int DEFAULT_WIDTH = 31;
+
+    /**
      * @var array<string, Table>
      */
     private array $tables = [];
@@ -28,6 +34,13 @@ final class Declaration
      * @var array<string, true>
      */
     private array $renumberedTypes = [];
+
+    /**
+     * The width of the renumbered ids, by type, where a column declares one.
+     *
+     * @var array<string, int>
+     */
+    private array $widths = [];
 
     /**
      * @param iterable<Table> $tables
@@ -77,6 +90,29 @@ final class Declaration
     }
 
     /**
+     * Returns the width of the renumbered ids of a type: the declared one, 31 bits otherwise.
+     */
+    public function renumberingWidth(string $type): int
+    {
+        return $this->widths[$type] ?? self::DEFAULT_WIDTH;
+    }
+
+    /**
+     * Lists the width of the renumbered ids of each renumbered type.
+     *
+     * @return array<string, int>
+     */
+    public function renumberingWidths(): array
+    {
+        $widths = [];
+        foreach (array_keys($this->renumberedTypes) as $type) {
+            $widths[$type] = $this->renumberingWidth($type);
+        }
+
+        return $widths;
+    }
+
+    /**
      * Lists the renumbered types, in the order they were met.
      *
      * @return list<string>
@@ -116,6 +152,13 @@ final class Declaration
     {
         if ($strategy instanceof RenumberedId) {
             $this->renumberedTypes[$strategy->type] = true;
+            if ($strategy->bits !== null) {
+                $width = $this->widths[$strategy->type] ?? $strategy->bits;
+                if ($width !== $strategy->bits) {
+                    throw new InvalidConfigurationException(sprintf('the ids of %s are renumbered on %d and %d bits: one width per type', $strategy->type, $width, $strategy->bits));
+                }
+                $this->widths[$strategy->type] = $width;
+            }
         }
         if ($strategy instanceof CompositeInterface) {
             foreach ($strategy->innerStrategies() as $inner) {

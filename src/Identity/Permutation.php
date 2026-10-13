@@ -23,16 +23,38 @@ final readonly class Permutation
     public const int MAX = 2147483647;
 
     /**
+     * The largest id the permutation admits, and returns.
+     */
+    public int $max;
+
+    /**
      * @param int $bits the width of the network, even, from 2 to 32
+     * @param ?int $max the largest id, within the network; by default the largest the width allows, at most `MAX`
      */
     public function __construct(
         private string $key,
         private bool $identity = false,
         private int $bits = 32,
+        ?int $max = null,
     ) {
         if ($bits < 2 || $bits > 32 || $bits % 2 !== 0) {
             throw new \InvalidArgumentException(sprintf('the width of a permutation is even, from 2 to 32 bits, %d given', $bits));
         }
+        $this->max = min($max ?? self::MAX, (1 << $bits) - 1, self::MAX);
+    }
+
+    /**
+     * Returns the permutation of the ids of the given width, from 1 to 2^width - 1: 31 bits is the default domain.
+     *
+     * An odd width runs the network of the next even one and walks back into the domain.
+     */
+    public static function ofWidth(string $key, int $width): self
+    {
+        if ($width < 1 || $width > 31) {
+            throw new \InvalidArgumentException(sprintf('the width of renumbered ids is from 1 to 31 bits, %d given', $width));
+        }
+
+        return new self($key, bits: max(2, $width + $width % 2), max: (1 << $width) - 1);
     }
 
     /**
@@ -98,11 +120,11 @@ final readonly class Permutation
     }
 
     /**
-     * Tells whether a value is an id the permutation admits: from 1 to the largest the width allows.
+     * Tells whether a value is an id the permutation admits: from 1 to its largest.
      */
     private function isId(int $value): bool
     {
-        return $value >= 1 && $value <= min(self::MAX, (1 << $this->bits) - 1);
+        return $value >= 1 && $value <= $this->max;
     }
 
     /**
