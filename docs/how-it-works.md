@@ -28,15 +28,17 @@ what they need:
   second strategy to the values the first refuses, so that the caller decides what becomes of
   malformed data; `WithoutEmails`, `WithoutPhones` and `WithoutIps` replace the email addresses,
   phone numbers and IP addresses of what the wrapped strategy returns, `WithoutIdentifiers` all
-  three at once; `Hashed` hashes it, for a column that stores the digest of another.
+  three at once; `Hashed` hashes what the wrapped strategy returns, for a column that stores the
+  digest of another.
 
 ## The generator
 
 The **generator** draws each value from the SHA-256 blocks of the salt, the table, the key of
 the row and the column; the pseudonym of an object is drawn the same way, from the salt and its
-reference, each of its fields on its own. No draw shares a state with another, nor with the
-random generator of PHP: two runs give the same result, whatever the order of the rows, the
-version of PHP or the libraries loaded beside.
+reference, each of its fields on its own. An address or a number quoted in a text is drawn from
+the salt and the value itself, so that it is the same wherever it is quoted. No draw shares a
+state with another, nor with the random generator of PHP: two runs give the same result,
+whatever the order of the rows, the version of PHP or the libraries loaded beside.
 
 The **language** holds the words a fake identity is drawn from, first names by gender, last
 names, streets, cities, organizations, and the conventions that the shape-preserving
@@ -51,7 +53,8 @@ object. Without a platform package, `Generic` knows HTML alone.
 ## The renumbering
 
 The ids are renumbered by a **permutation** specific to each object type and to the salt: a
-Feistel network of four rounds over HMAC-SHA256, within the domain of a signed 32-bit integer.
+Feistel network of four rounds over HMAC-SHA256, within the positive values of a signed 32-bit
+integer, or a narrower width that the declaration gives the type.
 It is reversible, so that the real id can be found behind a renumbered one by whoever holds the
 salt, and it leaves zero and the negatives alone, the values that mean "no object".
 
@@ -63,25 +66,27 @@ The width holds for the type: declared once, or the same everywhere. Before writ
 the dump checks that every column receiving renumbered ids can hold the largest of its type, an
 integer column by its type, a string column by its length; the dry run reports the same.
 
-Declaring `RenumberedId('person')` somewhere renumbers the persons everywhere: the foreign keys,
-the polymorphic links whose type is renumbered, the ids inside the blobs, the references the
-platform embeds in the texts. A link to an object of a type that is not renumbered stays as it
-is. `new Generator($salt, renumbering: false)`, or `Configuration::disguiser(renumbering: false)`,
-turns the renumbering off without touching the declaration: a pass on the fly over a live base
-then keeps its ids, so that what the site reads back by id lands on the same object
+Declaring `RenumberedId('person')` somewhere renumbers the persons everywhere: the foreign keys, the
+polymorphic links whose type is renumbered, the ids declared inside the blobs, the references the
+platform embeds in the texts. A link to an object of a type that is not renumbered stays as it is.
+`new Generator($salt, renumbering: false)`, or `Configuration::disguiser(renumbering: false)`, turns
+the renumbering off without touching the declaration: a pass on the fly over a live base then keeps
+its ids, so that what the site reads back by id lands on the same object
 ([On the fly](on-the-fly.md)).
 
-The email of a pseudonym carries the renumbered id of its object in base 36: unique within its
-type, even for two objects that draw the same names, which a unique key on the column requires.
+The email of a pseudonym carries the permuted id of its object in base 36, its real id when the
+renumbering is off: unique within its type, even for two objects that draw the same names, which
+a unique key on the column requires.
 
 ## The observation pass
 
 Some facts of shape must be known before any row is transformed: `FirstName` notes how many
 words the first name of a person counts, so that `FullName` serves exactly as many to the full
 name of the same person, in another table; `Email` and `Phone` note whose address or number it
-is, so that `WithoutEmails` and `WithoutPhones` give the same fake one where a text quotes it. The disguiser
-therefore observes the whole batch first, and transforms second; the dump reads every observing
-table once, whole, before writing anything, and the order of the tables does not matter.
+is, so that `WithoutEmails` and `WithoutPhones` give the same fake one where a text quotes it.
+The disguiser therefore observes the whole batch first, and transforms second; the dump reads
+every observing table once, whole, before writing anything, and the order of the tables does
+not matter.
 
 ## Following the owner
 
@@ -96,7 +101,8 @@ only an email. `ReferenceColumns::fromValue('guest', 'billing_email')`, usually 
 of the user column, gives every row carrying the same address, case and blanks aside, the same
 object, whose id is a salted digest of the address, kept in memory only. When an `Email` column
 holds that address for a person, the guest takes the pseudonym of that person: a guest who
-signed up keeps one identity.
+signed up keeps one identity. Only the pseudonym follows; what derives from the reference
+itself, the IP address of the object, the shift of its dates, stays that of the guest.
 
 ## Extending a declaration
 

@@ -10,7 +10,7 @@ composer fix        # Rector, then the coding style
 
 | Script | Tool | Changes the files |
 | --- | --- | --- |
-| `check` | the five below, in order | no |
+| `check` | `check:syntax`, `check:cs`, `check:rector`, `check:static`, then `test`, in order | no |
 | `check:syntax` | parallel-lint | no |
 | `check:cs` | EasyCodingStandard | no |
 | `check:rector` | Rector, dry run | no |

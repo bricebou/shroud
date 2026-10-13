@@ -10,20 +10,22 @@
 Deterministic, CMS-agnostic pseudonymisation of a relational database: consistent fake
 identities, reversible ids, shape-preserving text replacement, verifiable coverage.
 
-Shroud turns the base of a site into a dump without a real name, email or address that still
-looks and behaves like the original: the same person keeps the same fake name and the same fake
-email in every table, the ids are renumbered consistently, the texts keep their shape, the
-markup of the platform survives. The dump imports into an empty base, for development, tests,
-demonstrations or hand-overs.
+Shroud turns the base of a site into a dump without a real name, email, phone number or address that
+still looks and behaves like the original: the same person keeps the same fake name and the same
+fake email in every table, and in the texts that quote them; the ids are renumbered consistently,
+the texts keep their shape, the markup of the platform survives. The dump imports into an empty
+base, for development, tests, demonstrations or hand-overs.
 
 ## What it does
 
 - **One declaration per table**: a primary key, the columns that reference an object, and a
   strategy per column. A column absent from the declaration stops the run: nothing passes by
   default.
-- **A deterministic generator**: every fake value derives from a salt, the table, the row and
-  the column. Never from the real value, never from the order of the reads. Two runs give the
-  same result, byte for byte.
+- **A deterministic generator**: every fake value derives from the salt and from what it stands
+  for: the object of a pseudonym, the table, row and column of any other value, or, for an
+  address or a number quoted in a text, that value itself, through a keyed digest or
+  permutation, so that it is the same everywhere. Never from the order of the reads: two runs
+  give the same result, byte for byte.
 - **A pseudonym per object**: the same person receives the same fake identity in every table
   where they appear, serialized blobs and JSON documents included, and a coordinate linked to
   a person through a chain of tables carries their pseudonym.
@@ -49,25 +51,25 @@ references it embeds in them, its connection file and its column vocabulary. See
   salt is versioned with the project, so the dump is reproducible, and whoever holds the salt
   can trace a renumbered id back to the real row to reproduce a bug. This is the
   [pseudonymisation](#pseudonymisation-the-default) regime.
-- **A staging or demonstration site.** The site keeps the volume, the relations and the look of
-  real content, without showing a real name, email or address to a client or an audience.
+- **A staging or demonstration site.** The site keeps the volume, the relations and the look of real
+  content, without showing a real name, email, phone number or address to a client or an audience.
 - **A base handed to a contractor.** An agency, a freelancer or a hosting provider receives a
   base to work on. `--random-salt` cuts every link to the original, and the tables of mass data
   come out empty; whether the result is anonymous remains for the controller to assess, see
   [towards anonymisation](#towards-anonymisation-with-a-random-salt).
 - **Tests in continuous integration.** The dump is made where the real base lives, then imported
   by the pipeline as a fixture: with the same salt it comes out the same, byte for byte, and the
-  tests run against realistic data without a real name, email or address.
+  tests run against realistic data without a real name, email, phone number or address.
 - **Tests or jobs against the real base.** When a copy is not an option, the rows are disguised
   in memory as they are read, and only disguised rows reach the documents, snapshots or logs the
   code produces. See [On the fly](docs/on-the-fly.md).
 
 ## Two regimes, in the sense of the GDPR
 
-Shroud removes the direct identifiers and replaces them with values that derive from none of the
-real ones. What it keeps is the structure: the number of rows, the relations between them, the
-shape of the values, the dates shifted by a per-person offset. Whether the result is personal
-data or not depends on what else exists, and the regulation draws the line there.
+Shroud removes the direct identifiers and replaces them with values from which the real ones cannot
+be read back without the salt. What it keeps is the structure: the number of rows, the relations
+between them, the shape of the values, the dates shifted by a per-person offset. Whether the result
+is personal data or not depends on what else exists, and the regulation draws the line there.
 
 ### Pseudonymisation, the default
 
@@ -150,7 +152,7 @@ connection file, its draft rules and its glossaries. A project then starts from 
 declaration and adds its own tables and columns; `shroud-diff` tells apart what belongs to the
 site from what belongs to the version of the platform.
 
-The first platform package, for SPIP, is being built on
+The first platform package, for SPIP, lives on
 [git.spip.net](https://git.spip.net/spip-contrib-outils/shroud-spip). Without a platform
 package, the core treats the base as a generic relational base whose texts carry HTML at most,
 and the declaration is written by hand, with `shroud-diff` drafting it.

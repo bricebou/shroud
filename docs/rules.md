@@ -1,7 +1,7 @@
 # Replacement rules
 
-A transformed value keeps the shape of the original and nothing of its content. The rules, in
-the order they apply:
+A transformed value keeps the shape of the original and nothing of its content. The rules, by
+element of the original:
 
 | Element of the original | Becomes |
 | --- | --- |
@@ -13,14 +13,14 @@ the order they apply:
 | An elision of the language before a word: `d'Aubigné`, `qu'importe` | Nothing: it disappears with its apostrophe |
 | Blanks, non-breaking spaces, punctuation, hyphens | Unchanged, in place |
 | HTML tags and entities, the markup of the platform | Unchanged; a reference embedded by the platform follows the renumbering of its object |
-| A `+` and up to three digits at the head of a phone number | Unchanged, the rest of the digits replaced; `Phone` keeps the `0` of a national number too, and lays the digits of the pseudonym from the last, so that a number written two ways stays one |
+| A `+` and up to three digits at the head of a phone number | Unchanged with `ShapedDigits(keepDiallingCode: true)`, the rest of the digits replaced; `Phone` also keeps a dialling code in parentheses, `(+33)`, and the `0` of a national number, and lays the digits of the pseudonym from the last, so that a number written two ways stays one |
 | The host of a URL | Kept, or replaced by the fake domain of the pseudonym, as the declaration chooses; the path is rewritten, query and fragment dropped |
 | A URL declared unique | Its last segment takes ten characters drawn from the original, so that two alike pseudonyms do not collide on a primary key |
-| A phone number in a kept text, with `WithoutPhones`: 8 to 15 digits in groups, or glued after a `+` | The digits of the pseudonym of the person whose phone column holds it, or digits drawn from the number itself, laid like `Phone` does; dates, amounts, IP addresses, versions and ranges of years are left alone |
+| A phone number in a kept text, with `WithoutPhones`: 8 to 15 digits in groups of at most four, or glued after a `+` | The digits of the pseudonym of the person whose phone column holds it, or digits drawn from the number itself, laid like `Phone` does; dates, amounts, IP addresses, versions, ranges of years, and digits glued without a `+`, ids or timestamps, are left alone |
 | An IP address in a kept text or a column of addresses, with `WithoutIps` | Another address, the same everywhere for the same address, never the original nor shared with another: a routable IPv4 address becomes another routable one, an IPv6 address one of `2001:db8::/32`; loopback, private and reserved addresses stay |
-| The IP address of an object, with `Ip` | One address per object, in `240.0.0.0/4` or `2001:db8::/32` as the original, never shared within its type |
+| The IP address of an object, with `Ip` | One address per object, in `240.0.0.0/4` or `2001:db8::/32` as the original, never shared within its type when its id is a number up to 268435454; loopback, private and reserved addresses stay |
 | An email address in a kept text, when the declaration asks for it | The address of the pseudonym of the person whose email column holds it, or a fake address on a reserved domain drawn from the address, the same in the whole base, case ignored |
-| A date | Shifted by a number of days specific to the referenced object, so that the gaps between the dates of one object remain; the SQL zero date stays |
+| A date | Shifted by a number of days specific to the referenced object, or to the row without reference, so that the gaps between the dates of one object remain; the SQL zero date stays |
 | A hexadecimal digest of another column | The digest of the fake value of that column, with the same algorithm |
 | An id | The number the permutation of its type gives, the same everywhere, within the width of the type, 31 bits by default; zero and negatives stay |
 

@@ -13,9 +13,10 @@ fixtures, snapshots, logs; it says nothing about who may read the base.
 ## Three rules
 
 **One disguiser for the whole run.** The pseudonyms are deterministic and come out the same from
-any disguiser built on the same salt and the same language, whatever else the process draws, but the facts observed on the objects live in the disguiser
-that observed them: the number of words of a first name, the owner of an email. Build it once,
-keep it for the run, drop it at the end.
+any disguiser built on the same salt, language and declaration, whatever else the process draws,
+but the facts observed on the objects live in the disguiser that observed them: the number of
+words of a first name, the owner of an email, the holder of an address or a number quoted in a
+text. Build it once, keep it for the run, drop it at the end.
 
 **No renumbering.** The code that reads the base often reads more of it by id, behind the
 disguiser's back: the keywords of an article, the URL of a person. `disguiser(renumbering: false)`
