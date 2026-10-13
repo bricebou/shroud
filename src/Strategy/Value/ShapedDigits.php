@@ -20,7 +20,7 @@ final class ShapedDigits extends AbstractTextStrategy
     /**
      * An international dialling code: a `+` followed by one to three digits.
      */
-    public const string DIALLING_CODE = '\+\d{1,3}';
+    private const string DIALLING_CODE = '\+\d{1,3}';
 
     public function __construct(
         private readonly bool $keepDiallingCode = false,

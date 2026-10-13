@@ -7,6 +7,8 @@ namespace Shroud\Tests\Unit\Strategy\Wrapper;
 use Shroud\Context;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Generator;
+use Shroud\Identity\Reference;
+use Shroud\Strategy\Pseudonym\Phone;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Clear;
 use Shroud\Strategy\Value\Constant;
@@ -14,8 +16,10 @@ use Shroud\Strategy\Value\ShapedDigits;
 use Shroud\Strategy\Wrapper\Fallback;
 use Shroud\Strategy\Wrapper\WithoutEmails;
 use Shroud\Strategy\Wrapper\WithoutIps;
+use Shroud\Strategy\Wrapper\WithoutPhones;
 use Shroud\Tests\Unit\Strategy\StrategyTestCase;
 use Shroud\Text\Ips;
+use Shroud\Text\Phones;
 
 final class WrapperStrategiesTest extends StrategyTestCase
 {
@@ -123,5 +127,51 @@ final class WrapperStrategiesTest extends StrategyTestCase
         self::assertEquals([
             'log' => new WithoutIps(),
         ], WithoutIps::forColumns(['log']));
+    }
+
+    /**
+     * A number held by a person in a phone column takes the digits of their pseudonym in every text.
+     */
+    public function testWithoutPhonesGivesANumberTheDigitsOfItsHolder(): void
+    {
+        $generator = new Generator(self::SALT);
+        new Phone()->observe('06 12 34 56 78', self::context($generator));
+        $column = self::applyToString(new Phone(), '06 12 34 56 78', self::context($generator));
+        $page = self::context($generator, column: 'body', key: '7', reference: null);
+
+        self::assertSame("Call {$column} or +33 " . substr($column, 1) . '.', self::apply(new WithoutPhones(), 'Call 06 12 34 56 78 or +33 6 12 34 56 78.', $page));
+    }
+
+    public function testWithoutPhonesDrawsAnUnheldNumberFromItself(): void
+    {
+        $generator = new Generator(self::SALT);
+        $fake = self::applyToString(new WithoutPhones(), 'Call 06 98 76 54 32.', self::context($generator, reference: null));
+
+        self::assertMatchesRegularExpression('/^Call 0\d \d\d \d\d \d\d \d\d\.$/', $fake);
+        self::assertNotSame('Call 06 98 76 54 32.', $fake);
+        self::assertSame($fake, self::apply(new WithoutPhones(), 'Call 06 98 76 54 32.', self::context(new Generator(self::SALT), column: 'other', key: '9', reference: null)), 'the same everywhere');
+        self::assertSame('Born 12.03.2026, ref 1234567890.', self::apply(new WithoutPhones(), 'Born 12.03.2026, ref 1234567890.'));
+        self::assertSame('x', self::apply(new WithoutPhones(new Constant('x')), '06 12 34 56 78'));
+        self::assertNull(self::apply(new WithoutPhones(), value: null));
+        self::assertEquals([
+            'notes' => new WithoutPhones(),
+        ], WithoutPhones::forColumns(['notes']));
+    }
+
+    /**
+     * A switchboard number held by several persons goes to the smallest reference, whatever the order of the reads.
+     */
+    public function testANumberHeldByManyGoesToTheSmallestReference(): void
+    {
+        $key = Phones::key('01 23 45 67 89');
+        $first = new Generator(self::SALT);
+        $first->noteHolder('phone', $key, new Reference('person', 7));
+        $first->noteHolder('phone', $key, new Reference('person', 12));
+        $second = new Generator(self::SALT);
+        $second->noteHolder('phone', $key, new Reference('person', 12));
+        $second->noteHolder('phone', $key, new Reference('person', 7));
+
+        self::assertEquals($first->holderOf('phone', $key), $second->holderOf('phone', $key));
+        self::assertNull($first->holderOf('phone', 'unknown'));
     }
 }

@@ -43,6 +43,13 @@ final class Generator
     private array $memory = [];
 
     /**
+     * The objects that hold a value, by kind then value: the person whose phone column carries a number.
+     *
+     * @var array<string, array<string, Reference>>
+     */
+    private array $holders = [];
+
+    /**
      * @param bool $renumbering false to leave every id untouched
      * @param LanguageInterface $language the words of the fake identities and the conventions that the shape-preserving replacement follows
      * @param PlatformInterface $platform the platform that owns the base, generic by default
@@ -131,6 +138,28 @@ final class Generator
     public function remember(Reference $reference, string $key, mixed $value): void
     {
         $this->memory[$key][$reference->toKey()] = $value;
+    }
+
+    /**
+     * Notes that an object holds a value, so that the value follows it wherever it is quoted.
+     *
+     * A value held by several objects, a switchboard number, goes to the smallest reference key:
+     * the result does not depend on the order of the reads.
+     */
+    public function noteHolder(string $kind, string $value, Reference $holder): void
+    {
+        $current = $this->holders[$kind][$value] ?? null;
+        if (! $current instanceof Reference || strcmp($holder->toKey(), $current->toKey()) < 0) {
+            $this->holders[$kind][$value] = $holder;
+        }
+    }
+
+    /**
+     * Returns the object that holds a value, or null when none was observed.
+     */
+    public function holderOf(string $kind, string $value): ?Reference
+    {
+        return $this->holders[$kind][$value] ?? null;
     }
 
     /**
