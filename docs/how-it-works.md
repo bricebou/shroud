@@ -78,8 +78,8 @@ type, even for two objects that draw the same names, which a unique key on the c
 
 Some facts of shape must be known before any row is transformed: `FirstName` notes how many
 words the first name of a person counts, so that `FullName` serves exactly as many to the full
-name of the same person, in another table; `Phone` notes whose number it is, so that
-`WithoutPhones` gives the same digits to the number where a text quotes it. The disguiser
+name of the same person, in another table; `Email` and `Phone` note whose address or number it
+is, so that `WithoutEmails` and `WithoutPhones` give the same fake one where a text quotes it. The disguiser
 therefore observes the whole batch first, and transforms second; the dump reads every observing
 table once, whole, before writing anything, and the order of the tables does not matter.
 

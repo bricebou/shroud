@@ -14,9 +14,10 @@ use Shroud\Text\Emails;
 /**
  * Replaces the email addresses of a text kept as is, or transformed by another strategy.
  *
- * Each address becomes a fake address on a reserved domain, the same everywhere for the same
- * address, whatever the table: a public content that quotes a person quotes them the same way
- * in every row. The rest of the text does not change.
+ * An address that an `Email` column holds for an object becomes the fake address of its
+ * pseudonym: the person keeps one address, in their columns and in the texts that quote them.
+ * Any other address becomes a fake one on a reserved domain, drawn from itself, the same
+ * everywhere. The rest of the text does not change.
  */
 final readonly class WithoutEmails implements RelayingObserverInterface
 {
@@ -35,7 +36,11 @@ final readonly class WithoutEmails implements RelayingObserverInterface
             return $result;
         }
 
-        return Emails::replaceIn($result, static fn (string $address): string => Emails::disguise($address, $context->generator));
+        return Emails::replaceIn($result, static function (string $address) use ($context): string {
+            $holder = $context->generator->holderOf('email', Emails::key($address));
+
+            return $holder instanceof \Shroud\Identity\Reference ? $context->generator->pseudonymFor($holder)->email : Emails::disguise($address, $context->generator);
+        });
     }
 
     public function observe(mixed $value, Context $context): void

@@ -37,11 +37,19 @@ final class Emails
     }
 
     /**
+     * Returns what tells one address from another however it is written: trimmed, in lowercase.
+     */
+    public static function key(string $address): string
+    {
+        return mb_strtolower(trim($address));
+    }
+
+    /**
      * Draws the fake address of a real one: names of the language, a reserved domain.
      */
     public static function disguise(string $address, Generator $generator): string
     {
-        $draw = $generator->draw('email', mb_strtolower($address));
+        $draw = $generator->draw('email', self::key($address));
         $vocabulary = $generator->language()->vocabulary();
         $firstName = $vocabulary->firstName($draw->boolean() ? Gender::Female : Gender::Male, $draw);
 

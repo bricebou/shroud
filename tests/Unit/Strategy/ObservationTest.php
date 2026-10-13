@@ -15,6 +15,7 @@ use Shroud\Strategy\Nested\Json;
 use Shroud\Strategy\Nested\PerKey;
 use Shroud\Strategy\Nested\Serialized;
 use Shroud\Strategy\Observation;
+use Shroud\Strategy\Pseudonym\City;
 use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\FirstName;
 use Shroud\Strategy\Pseudonym\FullName;
@@ -44,7 +45,7 @@ final class ObservationTest extends StrategyTestCase
     {
         self::assertFalse(Observation::observes(new Keep()));
         self::assertFalse(Observation::observes(new ByColumn('key', [
-            'email' => new Email(),
+            'city' => new City(),
         ], new Keep())));
         self::assertFalse(Observation::observes(new Fallback(new Serialized(new PerKey([], new Keep())), new Clear())));
         self::assertFalse(Observation::observes(new Hashed(new FirstName())), 'a digest says nothing of a first name');
@@ -63,7 +64,7 @@ final class ObservationTest extends StrategyTestCase
         self::assertFalse(new Table('t', 'id', [
             'id' => new Keep(),
             'v' => new ByColumn('k', [
-                'x' => new Email(),
+                'x' => new City(),
             ], new Keep()),
         ])->hasObservers());
     }

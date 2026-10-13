@@ -8,6 +8,7 @@ use Shroud\Context;
 use Shroud\Exception\MissingReferenceException;
 use Shroud\Generator;
 use Shroud\Identity\Reference;
+use Shroud\Strategy\Pseudonym\Email;
 use Shroud\Strategy\Pseudonym\Phone;
 use Shroud\Strategy\StrategyInterface;
 use Shroud\Strategy\Value\Clear;
@@ -195,5 +196,19 @@ final class WrapperStrategiesTest extends StrategyTestCase
         self::assertEquals([
             'body' => new WithoutIdentifiers(),
         ], WithoutIdentifiers::forColumns(['body']));
+    }
+
+    /**
+     * An address held by a person in an email column becomes the address of their pseudonym in every text.
+     */
+    public function testWithoutEmailsGivesAnAddressTheEmailOfItsHolder(): void
+    {
+        $generator = new Generator(self::SALT);
+        new Email()->observe(' Zoe.Martin@Example.test', self::context($generator));
+        $email = $generator->pseudonymFor(new Reference('person', 42))->email;
+        $page = self::context($generator, column: 'body', key: '7', reference: null);
+
+        self::assertSame("Write to {$email}.", self::apply(new WithoutEmails(), 'Write to zoe.martin@example.test.', $page));
+        self::assertNotSame("Write to {$email}.", self::apply(new WithoutEmails(), 'Write to someone@example.test.', $page), 'an address nobody holds');
     }
 }
