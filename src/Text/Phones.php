@@ -21,9 +21,9 @@ final class Phones
     private const string SEPARATOR = '[ .\-\x{00A0}]';
 
     /**
-     * A candidate: groups, after an optional dialling code and an optional group in parentheses; or a `+` and digits glued.
+     * A candidate: groups, after an optional dialling code, `+33` or `(+33)`, and an optional group in parentheses; or a `+` and digits glued.
      */
-    private const string CANDIDATE = '/(?<![\p{L}\p{N}])(?:\+\d{1,3}' . self::SEPARATOR . '?)?(?:\(\d{1,4}\)' . self::SEPARATOR . '?)?\d{1,4}(?:' . self::SEPARATOR . '\d{1,4})+(?![\p{L}\p{N}])|(?<![\p{L}\p{N}])\+\d{8,15}(?![\p{L}\p{N}])/u';
+    private const string CANDIDATE = '/(?<![\p{L}\p{N}])(?:(?:\(\+\d{1,3}\)|\+\d{1,3})' . self::SEPARATOR . '?)?(?:\(\d{1,4}\)' . self::SEPARATOR . '?)?\d{1,4}(?:' . self::SEPARATOR . '\d{1,4})+(?![\p{L}\p{N}])|(?<![\p{L}\p{N}])\+\d{8,15}(?![\p{L}\p{N}])/u';
 
     /**
      * A date written in groups: a year first or last.
@@ -33,7 +33,7 @@ final class Phones
     /**
      * What a number keeps of its head, telling how to dial rather than whom: a dialling code, or the trunk prefix of a national number.
      */
-    private const string PREFIX = '/^\s*(?:\+\d{1,3}|0)/';
+    private const string PREFIX = '/^\s*(?:\(\+\d{1,3}\)|\+\d{1,3}|0)/';
 
     /**
      * Replaces each phone number of a text by what the callable returns for it.
@@ -109,7 +109,7 @@ final class Phones
         }
 
         // The dialling code and the group in parentheses, set apart with the separator after them.
-        $head = preg_match('/^(?:\+\d{1,3}' . self::SEPARATOR . '?(?=\d|\())?(?:\(\d{1,4}\)' . self::SEPARATOR . '?)?/u', $number, $match) === 1 ? $match[0] : '';
+        $head = preg_match('/^(?:(?:\(\+\d{1,3}\)|\+\d{1,3})' . self::SEPARATOR . '?(?=\d|\())?(?:\(\d{1,4}\)' . self::SEPARATOR . '?)?/u', $number, $match) === 1 ? $match[0] : '';
         $parts = preg_split('/(' . self::SEPARATOR . ')/u', substr($number, strlen($head)), -1, PREG_SPLIT_DELIM_CAPTURE);
         if ($parts === false) {
             return false;

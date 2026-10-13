@@ -29,6 +29,7 @@ final class PhonesTest extends TestCase
         yield 'four and four' => ['1840-3232'];
         yield 'national toll-free' => ['0 800 123 456'];
         yield 'british' => ['+44 20 7946 0958'];
+        yield 'dialling code in parentheses' => ['(+33) 6 12 34 56 78'];
     }
 
     /**
@@ -83,5 +84,6 @@ final class PhonesTest extends TestCase
         self::assertSame('09 87 65 43 21', Phones::lay('06 12 34 56 78', '123456789'));
         self::assertSame('+33 9 87 65 43 21', Phones::lay('+33 6 12 34 56 78', '123456789'));
         self::assertSame('(12) 1', Phones::lay('(12) 3', '12'), 'the digits start over');
+        self::assertSame('(+33) 9 87 65 43 21', Phones::lay('(+33) 6 12 34 56 78', '123456789'), 'a dialling code in parentheses');
     }
 }
